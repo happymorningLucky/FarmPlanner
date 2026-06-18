@@ -42,7 +42,7 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
       // Temporarily show the export container to capture it
       exportRef.current.style.display = "block"
       
-      const canvas = await html2canvas(exportRef.current, { scale: 2 })
+      const canvas = await html2canvas(exportRef.current, { scale: 2 } as any)
       const imgData = canvas.toDataURL("image/png")
       
       const pdf = new jsPDF("p", "mm", "a4")

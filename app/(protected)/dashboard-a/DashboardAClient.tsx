@@ -6,7 +6,7 @@ import { format, parseISO } from "date-fns"
 import { th } from "date-fns/locale"
 import styles from "./dashboard.module.css"
 
-type Inventory = { id: string, name: string, quantity: number, type: string, usageRate?: number, unit?: string, usageUnit?: string, conversionRate?: number }
+type Inventory = { id: string, name: string, quantity: number, type: string, usageRate?: number | null, unit?: string | null, usageUnit?: string | null, conversionRate?: number | null }
 
 type DashboardAClientProps = {
   inventories: Inventory[]
