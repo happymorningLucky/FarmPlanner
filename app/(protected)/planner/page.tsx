@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import Calendar from "@/components/planner/Calendar"
 
+export const dynamic = "force-dynamic"
+
 export default async function PlannerPage() {
   // Fetch tasks for the initial render (could fetch all or just current month)
   // For simplicity, we can fetch tasks from the past 2 months to next 2 months

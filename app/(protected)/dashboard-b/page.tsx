@@ -5,6 +5,8 @@ import styles from "./dashboardB.module.css"
 import { FiCheckCircle } from "react-icons/fi"
 import NotificationClient from "./NotificationClient"
 
+export const dynamic = "force-dynamic"
+
 export default async function DashboardBPage() {
   // Fetch completed tasks (ACTIVATED)
   const completedTasks = await prisma.task.findMany({

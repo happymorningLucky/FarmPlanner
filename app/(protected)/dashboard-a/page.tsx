@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import DashboardAClient from "./DashboardAClient"
 
+export const dynamic = "force-dynamic"
+
 export default async function DashboardAPage() {
   const session = await getServerSession(authOptions)
 
