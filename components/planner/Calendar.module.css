@@ -1,0 +1,177 @@
+.calendarWrapper {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.monthNav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navBtn {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-main);
+  transition: all 0.2s ease;
+}
+
+.navBtn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.currentMonth {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 150px;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.weekday {
+  text-align: center;
+  font-weight: 700;
+  padding: 0.5rem;
+  background-color: var(--color-background);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+}
+
+.dayCell {
+  min-height: 120px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.dayCell:hover {
+  border-color: var(--color-primary);
+}
+
+.dayCellDisabled {
+  background-color: var(--color-background);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.dayCellToday {
+  border: 2px solid var(--color-secondary);
+  background-color: #f0fbf9;
+}
+
+/* New style for past days */
+.dayCellPast {
+  background-color: #f8f9fa;
+}
+
+.dayCellPast .weatherInfo {
+  opacity: 0.8;
+  filter: grayscale(100%);
+}
+
+.dayCellPast .dateNum {
+  color: var(--color-text-muted);
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.dateNum {
+  font-weight: 700;
+  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.dateNumToday {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.weatherInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  transition: opacity 0.2s;
+}
+
+.weatherDanger {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
+}
+
+.taskItem {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskCompleted {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.taskIcon {
+  font-size: 0.9rem;
+}
+
+.taskUserDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}

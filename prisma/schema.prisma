@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  password     String
+  color        String   @default("#800080") // Default to Purple
+  role         String   @default("USER") // ADMIN or USER
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdTasks Task[]   @relation("CreatedTasks")
+  updatedTasks Task[]   @relation("UpdatedTasks")
+}
+
+model Task {
+  id           String   @id @default(cuid())
+  title        String
+  date         DateTime
+  status       String   @default("WAITING") // WAITING or ACTIVATED
+  icon         String   @default("📝")
+  color        String   @default("#40E0D0") // Default to Turquoise
+  plot         String?  // Optional plot name e.g. "แปลง A"
+  waterVolume  Float?   // Amount of water mixed for this task
+  
+  
+  // For inventory deduction
+  usages       TaskUsage[]
+
+  creatorId    String?
+  creator      User?    @relation("CreatedTasks", fields: [creatorId], references: [id], onDelete: SetNull)
+  
+  updaterId    String?
+  updater      User?    @relation("UpdatedTasks", fields: [updaterId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isWarningAcknowledged Boolean @default(false)
+}
+
+model Inventory {
+  id        String   @id @default(uuid())
+  name      String
+  type      String   // "FERTILIZER" | "CHEMICAL"
+  quantity  Float
+  usageRate Float?   @default(0) // อัตราการใช้ต่อน้ำ 200 ลิตร
+  unit      String?  // หน่วยรับเข้า เช่น ขวด, กระสอบ
+  usageUnit String?  // หน่วยใช้งาน เช่น c.c., กรัม
+  conversionRate Float? // ปริมาณต่อ 1 หน่วยใหญ่ เช่น 1000
+
+  usages    TaskUsage[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TaskUsage {
+  id           String    @id @default(cuid())
+  taskId       String
+  task         Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  inventoryId  String
+  inventory    Inventory @relation(fields: [inventoryId], references: [id])
+  quantity     Float     @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

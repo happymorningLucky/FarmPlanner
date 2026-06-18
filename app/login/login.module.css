@@ -1,0 +1,120 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  padding: 1rem;
+}
+
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.title {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: var(--color-text-main);
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+}
+
+.input {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-prompt);
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  border-color: var(--color-secondary);
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin-top: 0.5rem;
+}
+
+.button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.forgotPassword {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.forgotBtn {
+  background: none;
+  border: none;
+  color: var(--color-secondary);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.forgotBtn:hover {
+  color: var(--color-secondary-dark);
+}
+
+.successMsg {
+  color: var(--color-secondary-dark);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  background-color: #e8f8f5;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.passwordWrapper { position: relative; display: flex; align-items: center; }
+.eyeBtn { position: absolute; right: 10px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--color-text-muted); }
