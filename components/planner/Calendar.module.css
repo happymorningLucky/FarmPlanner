@@ -175,3 +175,77 @@
   flex-shrink: 0;
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
+
+.amuletGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.amuletCard {
+  background-color: var(--color-surface);
+  border: 1px solid #fecaca;
+  border-top: 4px solid #ef4444;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.amuletCardExpanded {
+  padding: 1rem;
+  justify-content: space-between;
+}
+
+.amuletCard:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #f87171;
+}
+
+.amuletTitle {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.amuletAction {
+  color: var(--color-text-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.amuletActionHighlight {
+  color: #15803d;
+}
+
+.amuletAssignees {
+  background-color: var(--color-background);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  margin-top: auto;
+}
+
+.amuletAssigneeLabel {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.amuletAssigneeNames {
+  color: var(--color-primary);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}

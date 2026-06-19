@@ -42,12 +42,18 @@ import TaskModal from "./TaskModal"
 import ExportModal from "./ExportModal"
 import { FiDownload } from "react-icons/fi"
 
-export default function Calendar({ initialTasks }: { initialTasks: Task[] }) {
+type CalendarProps = {
+  initialTasks: Task[]
+  issues?: any[]
+}
+
+export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
   const [locationInput, setLocationInput] = useState("")
   const [coords, setCoords] = useState({ lat: 13.75, lon: 100.51 })
+  const [expandedIssue, setExpandedIssue] = useState<number | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem("farm_location")
@@ -206,23 +212,6 @@ export default function Calendar({ initialTasks }: { initialTasks: Task[] }) {
             onKeyDown={(e) => e.key === "Enter" && parseLocation(locationInput)}
             style={{ padding: "0.5rem", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", width: "200px" }}
           />
-          <button 
-            onClick={() => setIsExportModalOpen(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "var(--color-primary)",
-              color: "white",
-              border: "none",
-              borderRadius: "var(--radius-md)",
-              fontWeight: 700,
-              cursor: "pointer"
-            }}
-          >
-            <FiDownload /> Export PDF
-          </button>
         </div>
       </div>
     )
@@ -320,8 +309,89 @@ export default function Calendar({ initialTasks }: { initialTasks: Task[] }) {
     return <div className={styles.calendarBody}>{rows}</div>
   }
 
+  const currentMonthNum = currentMonth.getMonth() + 1
+  const currentMonthIssues = issues.filter(issue => {
+    if (issue.startMonth <= issue.endMonth) {
+      return currentMonthNum >= issue.startMonth && currentMonthNum <= issue.endMonth
+    } else {
+      return currentMonthNum >= issue.startMonth || currentMonthNum <= issue.endMonth
+    }
+  })
+
   return (
-    <>
+    <div className={styles.calendarContainer}>
+      
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+        <div>
+          <h1 style={{ color: "var(--color-primary)", margin: 0, fontSize: "1.75rem", fontWeight: 700 }}>ปฏิทินแผนงาน</h1>
+          <p style={{ margin: 0, marginTop: "0.5rem", color: "var(--color-text-muted)" }}>แผนการทำงานและติดตามสภาพอากาศ</p>
+        </div>
+        <button 
+          onClick={() => setIsExportModalOpen(true)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.5rem 1rem",
+            backgroundColor: "var(--color-primary)",
+            color: "white",
+            border: "none",
+            borderRadius: "var(--radius-md)",
+            fontWeight: 700,
+            cursor: "pointer"
+          }}
+        >
+          <FiDownload /> Export PDF
+        </button>
+      </div>
+
+      {currentMonthIssues.length > 0 && (
+        <div className={styles.amuletGrid}>
+          {currentMonthIssues.map((issue, idx) => {
+            const assigneeNames = issue.assignees?.map((a: any) => a.username).join(", ") || "ไม่ระบุ"
+            const isExpanded = expandedIssue === idx
+            
+            return (
+              <div 
+                key={idx} 
+                className={`${styles.amuletCard} ${isExpanded ? styles.amuletCardExpanded : ''}`}
+                onClick={() => !isExpanded && setExpandedIssue(idx)}
+                style={{ cursor: isExpanded ? "default" : "pointer" }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div className={styles.amuletTitle} title={issue.problem} style={{ margin: isExpanded ? "0 0 0.5rem 0" : "0" }}>
+                    ⚠️ {isExpanded ? 'เฝ้าระวัง: ' : ''}{issue.problem}
+                  </div>
+                  {isExpanded && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setExpandedIssue(null) }}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-text-muted)", fontSize: "1.2rem", padding: "0 0.5rem" }}
+                      title="ปิด"
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+                
+                {isExpanded && (
+                  <>
+                    <p className={styles.amuletAction} title={issue.action}>
+                      🎯 วิธีปฏิบัติ: <span className={styles.amuletActionHighlight}>{issue.action}</span>
+                    </p>
+                    <div className={styles.amuletAssignees}>
+                      <span className={styles.amuletAssigneeLabel}>ผู้รับผิดชอบ</span>
+                      <span className={styles.amuletAssigneeNames} title={assigneeNames.length > 30 ? "ทุกคน" : assigneeNames}>
+                        {assigneeNames.length > 30 ? "ทุกคน" : assigneeNames}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       <div className={styles.calendarWrapper}>
         {renderHeader()}
         {renderDays()}
@@ -340,6 +410,6 @@ export default function Calendar({ initialTasks }: { initialTasks: Task[] }) {
         onClose={() => setIsExportModalOpen(false)}
         tasks={tasks}
       />
-    </>
+    </div>
   )
 }

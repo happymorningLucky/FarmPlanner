@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { FiCalendar, FiPieChart, FiList, FiLogOut, FiMenu, FiX, FiEye, FiEyeOff } from "react-icons/fi"
+import { FiCalendar, FiPieChart, FiList, FiLogOut, FiMenu, FiX, FiEye, FiEyeOff, FiAlertCircle } from "react-icons/fi"
 import styles from "./AppLayout.module.css"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -45,6 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { name: "ปฏิทินแผนงาน", path: "/planner", icon: <FiCalendar /> },
     { name: "ประวัติการทำงาน (GAP)", path: "/dashboard-b", icon: <FiList /> },
+    { name: "ปัญหาเฝ้าระวัง", path: "/issues", icon: <FiAlertCircle /> },
   ]
 
   if (session?.user?.role === "ADMIN") {

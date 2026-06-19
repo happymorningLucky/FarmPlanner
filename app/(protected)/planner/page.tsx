@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import Calendar from "@/components/planner/Calendar"
+import { getIssues } from "@/lib/actions/issueActions"
 
 export const dynamic = "force-dynamic"
 
@@ -28,6 +29,8 @@ export default async function PlannerPage() {
     }
   })
 
+  const issues = await getIssues()
+
   // We need to pass serializable data to Client Component
   const serializedTasks = tasks.map(t => ({
     ...t,
@@ -38,8 +41,7 @@ export default async function PlannerPage() {
 
   return (
     <div>
-      <h1 style={{ color: "var(--color-primary)", marginBottom: "1rem" }}>ปฏิทินแผนงาน</h1>
-      <Calendar initialTasks={serializedTasks} />
+      <Calendar initialTasks={serializedTasks} issues={issues} />
     </div>
   )
 }
