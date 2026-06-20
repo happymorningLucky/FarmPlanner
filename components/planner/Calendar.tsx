@@ -29,6 +29,7 @@ type Task = {
   color: string
   plot: string | null
   updater?: { color: string } | null
+  overdueDays?: number | null
 }
 
 type WeatherData = {
