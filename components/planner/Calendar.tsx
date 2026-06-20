@@ -137,9 +137,17 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
 
     if (overdue.length > 0) {
       setOverdueAlerts(overdue)
-      setTimeout(() => {
-        alert(`คุณมีงานที่ค้างจากวันก่อนหน้าจำนวน ${overdue.length} งาน ต้องการเลื่อนหรือยกเลิกหรือไม่? (กรุณาคลิกที่งานในปฏิทินเพื่อแก้ไข)`)
-      }, 500)
+      
+      // Check if we already alerted today
+      const todayStr = format(today, 'yyyy-MM-dd')
+      const lastAlert = localStorage.getItem('lastOverdueAlertDate')
+      
+      if (lastAlert !== todayStr) {
+        localStorage.setItem('lastOverdueAlertDate', todayStr)
+        setTimeout(() => {
+          alert(`คุณมีงานที่ค้างจากวันก่อนหน้าจำนวน ${overdue.length} งาน พื้นหลังของงานจะเปลี่ยนเป็นสีส้ม กรุณาคลิกที่งานในปฏิทินเพื่อจัดการหรืออัปเดตสถานะ`)
+        }, 500)
+      }
     }
   }, [tasks])
 
@@ -284,20 +292,29 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
             </div>
             
             <div className={styles.taskList}>
-              {dayTasks.map(t => (
-                <div 
-                  key={t.id} 
-                  className={`${styles.taskItem} ${t.status === "ACTIVATED" ? styles.taskCompleted : ""}`}
-                  style={{ backgroundColor: t.color }}
-                  onClick={(e) => openEditTaskModal(t, e)}
-                >
-                  <span className={styles.taskIcon}>{t.icon}</span>
-                  <span style={{ flexGrow: 1 }}>{t.title}</span>
-                  {t.updater?.color && (
-                    <div className={styles.taskUserDot} style={{ backgroundColor: t.updater.color }}></div>
-                  )}
-                </div>
-              ))}
+              {dayTasks.map(t => {
+                const taskDate = parseISO(t.date)
+                const isOverdue = t.status === "WAITING" && isBefore(taskDate, startOfToday())
+                const bgColor = isOverdue ? "#f97316" : t.color
+                
+                return (
+                  <div 
+                    key={t.id} 
+                    className={`${styles.taskItem} ${t.status === "ACTIVATED" ? styles.taskCompleted : ""}`}
+                    style={{ backgroundColor: bgColor }}
+                    onClick={(e) => openEditTaskModal(t, e)}
+                  >
+                    <span className={styles.taskIcon}>{t.icon}</span>
+                    <span style={{ flexGrow: 1 }}>
+                      {t.title}
+                      {t.status === "ACTIVATED" && t.overdueDays && t.overdueDays > 0 ? ` (*เกิน ${t.overdueDays} วัน)` : ""}
+                    </span>
+                    {t.updater?.color && (
+                      <div className={styles.taskUserDot} style={{ backgroundColor: t.updater.color }}></div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )

@@ -18,7 +18,7 @@ type TaskModalProps = {
 }
 
 const ICONS = ["💧", "✂️", "🌸", "🚜", "🌱", "🐛", "🧪", "📦", "📝"]
-const COLORS = ["#8e44ad", "#1abc9c", "#e74c3c", "#f39c12", "#3498db", "#2ecc71"]
+const COLORS = ["#8e44ad", "#1abc9c", "#e74c3c", "#3498db", "#2ecc71"]
 
 export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedDate, existingTask }: TaskModalProps) {
   const [title, setTitle] = useState("")

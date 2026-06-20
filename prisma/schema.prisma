@@ -31,6 +31,7 @@ model Task {
   color        String   @default("#40E0D0") // Default to Turquoise
   plot         String?  // Optional plot name e.g. "แปลง A"
   waterVolume  Float?   // Amount of water mixed for this task
+  overdueDays  Int?     // Number of days the task was overdue when completed
   
   
   // For inventory deduction

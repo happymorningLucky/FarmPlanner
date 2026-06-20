@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
 import { getServerSession } from "next-auth"
+import { differenceInDays, startOfToday } from "date-fns"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -54,16 +55,30 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       where: { taskId: id }
     })
 
+    // Calculate overdueDays and modify date if completed today
+    let finalDate = new Date(date)
+    let overdueDays: number | null = (existingTask as any).overdueDays || null
+
+    if (status === "ACTIVATED" && existingTask.status === "WAITING") {
+      const today = startOfToday()
+      const originalDate = new Date(existingTask.date)
+      if (originalDate < today) {
+        overdueDays = differenceInDays(today, originalDate)
+        finalDate = today
+      }
+    }
+
     const task = await prisma.task.update({
       where: { id },
       data: {
         title,
-        date: new Date(date),
+        date: finalDate,
         icon,
         color,
         plot,
         status: status || existingTask.status,
         waterVolume: waterVolume !== undefined ? (waterVolume ? parseFloat(waterVolume) : null) : existingTask.waterVolume,
+        overdueDays: overdueDays,
         updaterId: session.user.id,
         isWarningAcknowledged: usages ? false : undefined,
       }
