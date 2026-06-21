@@ -3,7 +3,7 @@ import './globals.css'
 import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
-  title: 'Farm Planner | รับทรัพย์ฟาร์ม',
+  title: 'Farm Planner | สวนสุขจันท์',
   description: 'Farm planner and management system',
 }
 

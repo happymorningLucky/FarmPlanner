@@ -1,4 +1,5 @@
 https://farm-planner-amber.vercel.app/
+https://farm-planner-p0vxs6gev-happymorning-lucky.vercel.app/login
 [ Antigravity ]
 
 ฉันอยากได้ web planner app ด้วย next js และ qrcode.js

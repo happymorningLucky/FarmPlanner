@@ -58,7 +58,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className={styles.mobileHeader}>
         <div className={styles.logo}>
           <div style={{ 
-            width: '182px', height: '52px', 
+            width: '236px', height: '68px', 
             backgroundColor: 'var(--color-primary)', 
             WebkitMaskImage: 'url("/logo2.png")', 
             WebkitMaskSize: 'contain', 
@@ -79,7 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.sidebarOpen : ""}`}>
         <div className={styles.sidebarLogo} style={{ display: 'flex', justifyContent: 'center' }}>
           <div style={{ 
-            width: '234px', height: '78px', 
+            width: '304px', height: '101px', 
             backgroundColor: 'var(--color-primary)', 
             WebkitMaskImage: 'url("/logo2.png")', 
             WebkitMaskSize: 'contain', 
