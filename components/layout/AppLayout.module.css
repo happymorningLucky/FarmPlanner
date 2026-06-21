@@ -191,7 +191,7 @@
   .main {
     margin-left: 0;
     padding: 1rem;
-    padding-top: 5rem; /* Space for mobile header */
+    padding-top: 7rem; /* Space for mobile header */
   }
   
   .overlay {
