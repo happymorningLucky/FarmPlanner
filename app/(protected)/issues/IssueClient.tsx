@@ -24,6 +24,38 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
   const [assigneeIds, setAssigneeIds] = useState<string[]>([])
   const [editIssueId, setEditIssueId] = useState<string | null>(null)
 
+  // Filter State
+  const [filterMonth, setFilterMonth] = useState<number | "ALL">("ALL")
+  const [filterKeyword, setFilterKeyword] = useState("")
+  const [filterAssignee, setFilterAssignee] = useState<string | "ALL">("ALL")
+
+  const filteredIssues = activeIssues.filter((issue: any) => {
+    if (filterMonth !== "ALL") {
+      const sm = issue.startMonth;
+      const em = issue.endMonth;
+      let inRange = false;
+      if (sm <= em) {
+        inRange = filterMonth >= sm && filterMonth <= em;
+      } else {
+        inRange = filterMonth >= sm || filterMonth <= em;
+      }
+      if (!inRange) return false;
+    }
+    if (filterKeyword) {
+      const lowerKeyword = filterKeyword.toLowerCase()
+      if (!issue.problem.toLowerCase().includes(lowerKeyword) && !issue.action.toLowerCase().includes(lowerKeyword)) {
+        return false;
+      }
+    }
+    if (filterAssignee !== "ALL") {
+      const assigneeIds = issue.assignees.map((a:any) => a.id)
+      if (!assigneeIds.includes(filterAssignee)) {
+        return false;
+      }
+    }
+    return true;
+  })
+
   // Resolve State
   const [resolveTargetId, setResolveTargetId] = useState<string | null>(null)
   const [resolutionText, setResolutionText] = useState("")
@@ -326,6 +358,31 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
         </form>
       )}
 
+      {/* Filter UI */}
+      <div style={{ backgroundColor: "var(--color-surface)", padding: "1rem 1.5rem", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)", border: "1px solid var(--color-border)", marginBottom: "1rem", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)" }}>กรองตามเดือน:</label>
+          <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value === "ALL" ? "ALL" : Number(e.target.value))} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)" }}>
+            <option value="ALL">ทุกเดือน</option>
+            {MONTHS.map((m, i) => <option key={i} value={i+1}>{m}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1, minWidth: "200px" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)" }}>ค้นหาปัญหา/วิธีแก้:</label>
+          <input type="text" placeholder="พิมพ์คำค้นหา..." value={filterKeyword} onChange={(e) => setFilterKeyword(e.target.value)} style={{ width: "100%", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)" }}>ผู้รับผิดชอบ:</label>
+          <select value={filterAssignee} onChange={(e) => setFilterAssignee(e.target.value)} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)" }}>
+            <option value="ALL">ทุกคน</option>
+            {users.map((u: any) => <option key={u.id} value={u.id}>{u.username}</option>)}
+          </select>
+        </div>
+        {(filterMonth !== "ALL" || filterKeyword || filterAssignee !== "ALL") && (
+          <button onClick={() => { setFilterMonth("ALL"); setFilterKeyword(""); setFilterAssignee("ALL"); }} style={{ color: "red", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", background: "none", border: "none" }}>ล้างตัวกรอง</button>
+        )}
+      </div>
+
       {/* Issues List */}
       <div style={{ backgroundColor: "var(--color-surface)", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)", overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "800px" }}>
@@ -339,12 +396,12 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
             </tr>
           </thead>
           <tbody>
-            {activeIssues.length === 0 ? (
+            {filteredIssues.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ padding: "2rem", textAlign: "center", color: "var(--color-text-muted)" }}>ไม่มีปัญหาที่ต้องเฝ้าระวัง</td>
+                <td colSpan={5} style={{ padding: "2rem", textAlign: "center", color: "var(--color-text-muted)" }}>ไม่พบปัญหาที่ตรงกับตัวกรอง</td>
               </tr>
             ) : (
-              activeIssues.map((issue: any) => (
+              filteredIssues.map((issue: any) => (
                 <tr key={issue.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
                   <td style={{ padding: "1rem", color: "var(--color-text-main)" }}>
                     {MONTHS[issue.startMonth - 1]} - {MONTHS[issue.endMonth - 1]}
