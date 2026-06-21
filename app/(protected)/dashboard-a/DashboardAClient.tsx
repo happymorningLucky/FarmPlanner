@@ -83,6 +83,7 @@ export default function DashboardAClient({ inventories: initialInventories, mock
   
   // Inventory SPA State
   const [inventories, setInventories] = useState<Inventory[]>(initialInventories)
+  const [selectedInvIds, setSelectedInvIds] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -254,6 +255,23 @@ export default function DashboardAClient({ inventories: initialInventories, mock
     setLoading(false)
   }
 
+  const handleBatchDelete = async () => {
+    if (selectedInvIds.length === 0) return
+    if (!confirm(`ต้องการลบพัสดุที่เลือกจำนวน ${selectedInvIds.length} รายการหรือไม่?`)) return
+    setLoading(true)
+    let hasError = false
+    for (const id of selectedInvIds) {
+      const res = await fetch(`/api/inventory/${id}`, { method: "DELETE" })
+      if (!res.ok) hasError = true
+    }
+    if (hasError) {
+      alert("เกิดข้อผิดพลาดในการลบบางรายการ")
+    }
+    setSelectedInvIds([])
+    await reloadInventory()
+    setLoading(false)
+  }
+
   const startEdit = (inv: Inventory) => {
     setEditingId(inv.id)
     setForm({ name: inv.name, type: inv.type, quantity: "", usageRate: inv.usageRate || "", unit: inv.unit || "", usageUnit: inv.usageUnit || "", conversionRate: inv.conversionRate || "" })
@@ -359,14 +377,25 @@ export default function DashboardAClient({ inventories: initialInventories, mock
         <div className={styles.card} style={{ gridColumn: "1 / -1" }}>
           <div className={styles.cardTitle} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><FiPackage /> จัดการสต็อกปุ๋ย/ยา</div>
-            {!showAddForm && !editingId && (
-              <button 
-                onClick={() => { setShowAddForm(true); setForm({ name: "", type: "FERTILIZER", quantity: "", usageRate: "", unit: "", usageUnit: "", conversionRate: "" }) }}
-                style={{ padding: "0.4rem 0.8rem", background: "var(--color-primary)", color: "white", borderRadius: "var(--radius-md)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
-              >
-                <FiPlus /> เพิ่มพัสดุ
-              </button>
-            )}
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              {selectedInvIds.length > 0 && (
+                <button 
+                  onClick={handleBatchDelete}
+                  style={{ padding: "0.4rem 0.8rem", background: "var(--color-danger)", color: "white", borderRadius: "var(--radius-md)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
+                  disabled={loading}
+                >
+                  <FiTrash2 /> ลบที่เลือก ({selectedInvIds.length})
+                </button>
+              )}
+              {!showAddForm && !editingId && (
+                <button 
+                  onClick={() => { setShowAddForm(true); setForm({ name: "", type: "FERTILIZER", quantity: "", usageRate: "", unit: "", usageUnit: "", conversionRate: "" }) }}
+                  style={{ padding: "0.4rem 0.8rem", background: "var(--color-primary)", color: "white", borderRadius: "var(--radius-md)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
+                >
+                  <FiPlus /> เพิ่มพัสดุ
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Add Form */}
@@ -428,6 +457,15 @@ export default function DashboardAClient({ inventories: initialInventories, mock
                       </form>
                     ) : (
                       <>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedInvIds.includes(inv.id)} 
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedInvIds([...selectedInvIds, inv.id]);
+                            else setSelectedInvIds(selectedInvIds.filter(id => id !== inv.id));
+                          }}
+                          style={{ marginRight: "0.5rem", width: "1.1rem", height: "1.1rem", accentColor: "var(--color-primary)", cursor: "pointer" }}
+                        />
                         <strong style={{ fontSize: "1rem", flex: 1 }}>{inv.name}</strong>
                         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                           {inv.usageRate ? <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>อัตราใช้: {inv.usageRate} {inv.usageUnit || ""}/ต้น</span> : null}
@@ -468,6 +506,15 @@ export default function DashboardAClient({ inventories: initialInventories, mock
                       </form>
                     ) : (
                       <>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedInvIds.includes(inv.id)} 
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedInvIds([...selectedInvIds, inv.id]);
+                            else setSelectedInvIds(selectedInvIds.filter(id => id !== inv.id));
+                          }}
+                          style={{ marginRight: "0.5rem", width: "1.1rem", height: "1.1rem", accentColor: "var(--color-primary)", cursor: "pointer" }}
+                        />
                         <strong style={{ fontSize: "1rem", flex: 1 }}>{inv.name}</strong>
                         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                           {inv.usageRate ? <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>อัตราใช้: {inv.usageRate} {inv.usageUnit || ""}/200L</span> : null}
