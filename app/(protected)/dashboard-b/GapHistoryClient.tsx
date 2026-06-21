@@ -88,36 +88,33 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
         )}
       </div>
 
-      <div className={styles.card}>
-      <div className="print:hidden mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4 mb-3">
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><FiCalendar /> ตั้งแต่วันที่</label>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 border border-gray-300 rounded" />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><FiCalendar /> ถึงวันที่</label>
-            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 border border-gray-300 rounded" />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><FiMapPin /> ค้นหาแปลง</label>
-            <input type="text" placeholder="ชื่อแปลง..." value={plotSearch} onChange={e => setPlotSearch(e.target.value)} className="w-full p-2 border border-gray-300 rounded" />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><FiSearch /> ค้นหาพัสดุ/งาน</label>
-            <input type="text" placeholder="ชื่องาน, ปุ๋ย, ยา..." value={keywordSearch} onChange={e => setKeywordSearch(e.target.value)} className="w-full p-2 border border-gray-300 rounded" />
-          </div>
+      {/* Filter UI */}
+      <div className="print:hidden" style={{ backgroundColor: "var(--color-surface)", padding: "1rem 1.5rem", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)", border: "1px solid var(--color-border)", marginBottom: "1.5rem", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", display: "flex", alignItems: "center", gap: "0.25rem" }}><FiCalendar /> ตั้งแต่วันที่:</label>
+          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)", color: "var(--color-text-main)" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", display: "flex", alignItems: "center", gap: "0.25rem" }}><FiCalendar /> ถึงวันที่:</label>
+          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)", color: "var(--color-text-main)" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", display: "flex", alignItems: "center", gap: "0.25rem" }}><FiMapPin /> ค้นหาแปลง:</label>
+          <input type="text" placeholder="ชื่อแปลง..." value={plotSearch} onChange={e => setPlotSearch(e.target.value)} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)", color: "var(--color-text-main)" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1, minWidth: "200px" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", display: "flex", alignItems: "center", gap: "0.25rem" }}><FiSearch /> ค้นหาพัสดุ/งาน:</label>
+          <input type="text" placeholder="ชื่องาน, ปุ๋ย, ยา..." value={keywordSearch} onChange={e => setKeywordSearch(e.target.value)} style={{ width: "100%", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)", color: "var(--color-text-main)" }} />
         </div>
         {hasFilters && (
-          <div className="flex justify-end">
-            <button onClick={clearFilters} className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium">
-              <FiX /> ล้างตัวกรองทั้งหมด
-            </button>
-          </div>
+          <button onClick={clearFilters} style={{ color: "red", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", background: "none", border: "none", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+            <FiX /> ล้างตัวกรอง
+          </button>
         )}
       </div>
 
-      <div className={styles.tableWrapper}>
+      <div className={styles.card}>
+        <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
