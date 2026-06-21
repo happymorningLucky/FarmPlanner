@@ -5,6 +5,7 @@ import { format, isWithinInterval, parseISO, startOfDay, endOfDay } from "date-f
 import { th } from "date-fns/locale"
 import { FiCheckCircle, FiSearch, FiCalendar, FiMapPin, FiX } from "react-icons/fi"
 import styles from "./dashboardB.module.css"
+import PrintButton from "./PrintButton"
 
 export default function GapHistoryClient({ completedTasks }: { completedTasks: any[] }) {
   const [startDate, setStartDate] = useState("")
@@ -63,7 +64,31 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
   const hasFilters = startDate || endDate || plotSearch || keywordSearch
 
   return (
-    <div className={styles.card}>
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }} className="print:hidden">
+        <div>
+          <h1 className={styles.title} style={{ margin: 0 }}>ประวัติการทำงาน (GAP)</h1>
+          <p className={styles.subtitle} style={{ margin: 0, marginTop: "0.5rem" }}>สรุปข้อมูลการปฏิบัติงานเพื่อใช้ประกอบการประเมินมาตรฐาน GAP</p>
+        </div>
+        <PrintButton />
+      </div>
+
+      {/* Print-only header */}
+      <div className="hidden print:block mb-6">
+        <h1 className="text-2xl font-bold text-center mb-2">ประวัติการทำงาน (GAP)</h1>
+        {hasFilters && (
+          <div className="text-center text-sm text-gray-700 mb-4 border-b pb-2">
+            <strong>ตัวกรองที่ใช้งาน: </strong>
+            {startDate && endDate && <span>ช่วงวันที่: {format(new Date(startDate), "dd MMM yyyy", { locale: th })} ถึง {format(new Date(endDate), "dd MMM yyyy", { locale: th })} | </span>}
+            {startDate && !endDate && <span>ตั้งแต่วันที่: {format(new Date(startDate), "dd MMM yyyy", { locale: th })} | </span>}
+            {!startDate && endDate && <span>ถึงวันที่: {format(new Date(endDate), "dd MMM yyyy", { locale: th })} | </span>}
+            {plotSearch && <span>แปลง: {plotSearch} | </span>}
+            {keywordSearch && <span>ค้นหา: {keywordSearch}</span>}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.card}>
       <div className="print:hidden mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex flex-col md:flex-row gap-4 mb-3">
           <div className="flex-1">
@@ -143,6 +168,7 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   )
 }
