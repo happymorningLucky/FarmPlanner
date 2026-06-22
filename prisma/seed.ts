@@ -20,17 +20,7 @@ async function main() {
 
   console.log({ admin })
 
-  // Seed Mock Inventory
-  await prisma.inventory.createMany({
-    data: [
-      { name: 'ปุ๋ย 15-15-15', type: 'FERTILIZER', quantity: 100 },
-      { name: 'ปุ๋ยยูเรีย 46-0-0', type: 'FERTILIZER', quantity: 50 },
-      { name: 'สารป้องกันแมลง (Abamectin)', type: 'CHEMICAL', quantity: 20 },
-      { name: 'สารกำจัดวัชพืช (Glufosinate)', type: 'CHEMICAL', quantity: 15 },
-    ],
-  })
-
-  console.log('Mock inventory seeded')
+  // Mock inventory removed to prevent overwriting real data in production
 }
 
 main()
