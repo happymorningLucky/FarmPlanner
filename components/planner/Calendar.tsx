@@ -376,14 +376,14 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
                 onClick={() => !isExpanded && setExpandedIssue(idx)}
                 style={{ cursor: isExpanded ? "default" : "pointer" }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div className={styles.amuletTitle} title={issue.problem} style={{ margin: isExpanded ? "0 0 0.5rem 0" : "0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                  <div className={styles.amuletTitle} title={issue.problem} style={{ margin: isExpanded ? "0 0 0.5rem 0" : "0", flex: 1, wordBreak: "break-word", overflowWrap: "break-word" }}>
                     ⚠️ {isExpanded ? 'เฝ้าระวัง: ' : ''}{issue.problem}
                   </div>
                   {isExpanded && (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setExpandedIssue(null) }}
-                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-text-muted)", fontSize: "1.2rem", padding: "0 0.5rem" }}
+                      style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: "var(--color-text-muted)", fontSize: "1.2rem", padding: "0 0.5rem" }}
                       title="ปิด"
                     >
                       &times;
