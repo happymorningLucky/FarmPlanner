@@ -52,7 +52,7 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
                 const conv = inv?.conversionRate || 1
                 return { 
                   inventoryId: u.inventoryId, 
-                  quantity: existingTask.status === "WAITING" ? "" : String(u.quantity / conv) 
+                  quantity: String(u.quantity / conv) 
                 }
               }))
             } else {
@@ -167,10 +167,12 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
                 <span className={styles.label}>สถานะ:</span>
                 <div>{existingTask.status === "ACTIVATED" ? "เสร็จสิ้น (Activated)" : "รอดำเนินการ (Waiting)"}</div>
               </div>
-              <div className={styles.formGroup}>
-                <span className={styles.label}>ปริมาณน้ำที่ใช้:</span>
-                <div>{existingTask.waterVolume || "-"} ลิตร</div>
-              </div>
+              {(existingTask.title.includes("พ่น") || existingTask.title.includes("ใส่")) && (
+                <div className={styles.formGroup}>
+                  <span className={styles.label}>{existingTask.title.includes("พ่น") ? "จำนวนถังที่ใช้:" : "จำนวนต้น:"}</span>
+                  <div>{existingTask.waterVolume || "-"} {existingTask.title.includes("พ่น") ? "ถัง (200L)" : "ต้น"}</div>
+                </div>
+              )}
               {existingTask.usages && existingTask.usages.length > 0 && (
                 <div className={styles.formGroup}>
                   <span className={styles.label}>พัสดุที่ใช้:</span>
