@@ -213,11 +213,16 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
               <div className={styles.formGroup} style={{ display: "flex", gap: "1rem" }}>
                 <div style={{ flex: 1 }}>
                   <label className={styles.label}>วันที่เริ่มต้น</label>
-                  <input type="date" className={styles.input} value={startDate} onChange={e => setStartDate(e.target.value)} required />
+                  <input type="date" className={styles.input} value={startDate} onChange={e => {
+                    setStartDate(e.target.value)
+                    if (endDate && new Date(e.target.value) > new Date(endDate)) {
+                      setEndDate("")
+                    }
+                  }} required />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className={styles.label}>ถึงวันที่ (ไม่บังคับ)</label>
-                  <input type="date" className={styles.input} value={endDate} onChange={e => setEndDate(e.target.value)} />
+                  <input type="date" className={styles.input} min={startDate} value={endDate} onChange={e => setEndDate(e.target.value)} />
                 </div>
               </div>
               
