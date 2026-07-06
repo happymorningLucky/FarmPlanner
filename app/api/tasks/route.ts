@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { title, date, icon, color, plot, status, usages, waterVolume } = body
+  const { title, date, endDate, icon, color, plot, status, usages, waterVolume } = body
 
   // Block if ACTIVATED and stock insufficient
   if (status === "ACTIVATED" && usages && Array.isArray(usages) && usages.length > 0) {
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       data: {
         title,
         date: new Date(date),
+        endDate: endDate ? new Date(endDate) : null,
         icon,
         color,
         plot,

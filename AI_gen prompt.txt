@@ -1,0 +1,45 @@
+Act as an expert Full-Stack Web Developer. I want you to build a Farm Management and GAP (Good Agricultural Practices) logging application called "Farm Planner".
+
+**Tech Stack:**
+- Framework: Next.js (App Router, TypeScript)
+- Database ORM: Prisma
+- Database: PostgreSQL (or similar relational DB)
+- Authentication: NextAuth.js (Credentials Provider for Admin)
+- Styling: Vanilla CSS Modules or Tailwind CSS (Clean, Modern, Mobile-First UI with white, purple, and subtle green accents).
+
+**Database Schema Requirements:**
+1. User: username, password, role.
+2. Inventory: name, type (FERTILIZER, CHEMICAL), quantity (base quantity), usageRate, unit (base unit like kg, cc), usageUnit (display unit like กระสอบ, ขวด), conversionRate (e.g., 1 กระสอบ = 50 kg).
+3. Task: title, date, icon, color, plot (แปลง), status (WAITING, ACTIVATED), waterVolume (used for both water liters/tanks and tree count), isWarningAcknowledged.
+4. TaskUsage: links Task to Inventory with quantity used.
+
+**Core Features & Pages:**
+1. **Authentication:** 
+   - A login page. Only logged-in users can access the dashboard.
+
+2. **Inventory Dashboard (`/inventory`):**
+   - Two columns/sections: "รายการปุ๋ย" and "รายการยา/สารเคมี".
+   - Ability to Create, Update, Delete items.
+   - Show remaining stock logically: e.g., "เหลือ: 2 กระสอบ (100 ก.ก.)".
+   - Include Checkboxes for "Batch Delete" functionality.
+
+3. **Calendar & GAP Planner (`/planner`):**
+   - A monthly calendar view showing tasks on specific days.
+   - Click a day to create a task, or click a task to edit.
+   - **Task Modal Logic:**
+     - Inputs: Date, Title, Plot (แปลง), Status, Icon, Color.
+     - If title contains "พ่น", show input for "จำนวนถังที่ใช้ (200L/ถัง)". If title contains "ใส่", show "จำนวนต้น:". Save this to `waterVolume`.
+     - Ability to select multiple Inventory items to use in this task.
+     - **Warning Logic:** If required quantity > available stock, show a warning "⚠️ สต๊อกไม่พอ ขาดอีก...". 
+     - **Stock Deduction Logic:** If Task status is changed to "ACTIVATED", automatically deduct the exact quantity from the Inventory database. If changed back to "WAITING", refund the stock.
+
+4. **PDF Export Feature:**
+   - A button to export the GAP log to PDF (using html2canvas + jspdf or similar).
+   - Must include a "Filter by Plot (กรองตามแปลง)" feature so users can generate specific PDF reports for specific plots to submit for GAP certification.
+
+5. **Design & UX Guidelines:**
+   - The UI must be fully responsive and look great on mobile phones (since farmers will use it in the field).
+   - Use Thai language for the entire UI.
+   - Do NOT include any mock data seeding in the production build scripts.
+
+Please provide the code step-by-step, starting with the Prisma schema, followed by the API routes, and then the Frontend pages and components.

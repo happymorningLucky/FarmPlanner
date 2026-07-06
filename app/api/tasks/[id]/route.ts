@@ -10,7 +10,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
   const body = await req.json()
-  const { title, date, icon, color, plot, status, usages, waterVolume } = body
+  const { title, date, endDate, icon, color, plot, status, usages, waterVolume } = body
 
   try {
     const existingTask = await prisma.task.findUnique({ 
@@ -73,6 +73,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       data: {
         title,
         date: finalDate,
+        endDate: endDate ? new Date(endDate) : null,
         icon,
         color,
         plot,

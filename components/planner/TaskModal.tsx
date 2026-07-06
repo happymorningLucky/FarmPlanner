@@ -23,6 +23,8 @@ const COLORS = ["#8e44ad", "#1abc9c", "#e74c3c", "#3498db", "#2ecc71"]
 export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedDate, existingTask }: TaskModalProps) {
   const [title, setTitle] = useState("")
   const [plot, setPlot] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [icon, setIcon] = useState("📝")
   const [color, setColor] = useState("#8e44ad")
   const [status, setStatus] = useState("WAITING")
@@ -41,6 +43,8 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
           if (existingTask) {
             setMode("view")
             setTitle(existingTask.title)
+            setStartDate(format(new Date(existingTask.date), "yyyy-MM-dd"))
+            setEndDate(existingTask.endDate ? format(new Date(existingTask.endDate), "yyyy-MM-dd") : "")
             setPlot(existingTask.plot || "")
             setIcon(existingTask.icon)
             setColor(existingTask.color)
@@ -61,6 +65,8 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
           } else {
             setMode("edit")
             setTitle("")
+            setStartDate(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "")
+            setEndDate("")
             setPlot("")
             setIcon("📝")
             setColor("#8e44ad")
@@ -82,7 +88,8 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
       await onSave({
         id: existingTask?.id,
         title,
-        date: existingTask ? existingTask.date : selectedDate?.toISOString(),
+        date: startDate ? new Date(startDate).toISOString() : selectedDate?.toISOString(),
+        endDate: endDate ? new Date(endDate).toISOString() : null,
         icon,
         color,
         plot,
@@ -148,7 +155,10 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
             <div className={styles.body}>
               <div className={styles.formGroup}>
                 <span className={styles.label}>วันที่:</span>
-                <div>{format(new Date(existingTask.date), "dd/MM/yyyy")}</div>
+                <div>
+                  {format(new Date(existingTask.date), "dd/MM/yyyy")}
+                  {existingTask.endDate && ` - ${format(new Date(existingTask.endDate), "dd/MM/yyyy")}`}
+                </div>
               </div>
               <div className={styles.formGroup}>
                 <span className={styles.label}>ชื่องาน:</span>
@@ -200,11 +210,16 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
         ) : (
           <form onSubmit={handleSubmit}>
             <div className={styles.body}>
-              {selectedDate && !existingTask && (
-                <div className={styles.formGroup}>
-                  <span className={styles.label}>วันที่: {format(selectedDate, "dd/MM/yyyy")}</span>
+              <div className={styles.formGroup} style={{ display: "flex", gap: "1rem" }}>
+                <div style={{ flex: 1 }}>
+                  <label className={styles.label}>วันที่เริ่มต้น</label>
+                  <input type="date" className={styles.input} value={startDate} onChange={e => setStartDate(e.target.value)} required />
                 </div>
-              )}
+                <div style={{ flex: 1 }}>
+                  <label className={styles.label}>ถึงวันที่ (ไม่บังคับ)</label>
+                  <input type="date" className={styles.input} value={endDate} onChange={e => setEndDate(e.target.value)} />
+                </div>
+              </div>
               
               <div className={styles.formGroup}>
                 <label className={styles.label}>ชื่องาน *</label>

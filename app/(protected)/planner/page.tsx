@@ -35,6 +35,7 @@ export default async function PlannerPage() {
   const serializedTasks = tasks.map(t => ({
     ...t,
     date: t.date.toISOString(),
+    endDate: t.endDate ? t.endDate.toISOString() : null,
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),
   }))

@@ -26,6 +26,7 @@ model Task {
   id           String   @id @default(cuid())
   title        String
   date         DateTime
+  endDate      DateTime? // Optional end date for multi-day tasks
   status       String   @default("WAITING") // WAITING or ACTIVATED
   icon         String   @default("📝")
   color        String   @default("#40E0D0") // Default to Turquoise

@@ -24,6 +24,7 @@ type Task = {
   id: string
   title: string
   date: string
+  endDate?: string | null
   status: string
   icon: string
   color: string
@@ -266,7 +267,15 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
           weatherIdx = weatherData.time.indexOf(dayStr)
         }
 
-        const dayTasks = tasks.filter(t => isSameDay(parseISO(t.date), cloneDay))
+        const dayTasks = tasks.filter(t => {
+          const tDate = parseISO(t.date)
+          const tEndDate = t.endDate ? parseISO(t.endDate) : tDate
+          const currentDayStr = format(cloneDay, "yyyy-MM-dd")
+          const startDayStr = format(tDate, "yyyy-MM-dd")
+          const endDayStr = format(tEndDate, "yyyy-MM-dd")
+          
+          return currentDayStr >= startDayStr && currentDayStr <= endDayStr
+        })
 
         let cellClasses = styles.dayCell
         if (!isCurrentMonth) cellClasses += ` ${styles.dayCellDisabled}`
