@@ -42,7 +42,8 @@ type WeatherData = {
 
 import TaskModal from "./TaskModal"
 import ExportModal from "./ExportModal"
-import { FiDownload } from "react-icons/fi"
+import OverdueModal from "./OverdueModal"
+import { FiDownload, FiAlertCircle } from "react-icons/fi"
 
 type CalendarProps = {
   initialTasks: Task[]
@@ -111,6 +112,9 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
   // Export Modal State
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
+  // Overdue Modal State
+  const [isOverdueModalOpen, setIsOverdueModalOpen] = useState(false)
+
   // Fetch Weather
   useEffect(() => {
     const fetchWeather = async () => {
@@ -134,12 +138,13 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
     const today = startOfToday()
     const overdue = tasks.filter(t => {
       const taskDate = parseISO(t.date)
-      return t.status === "WAITING" && isBefore(taskDate, today)
+      const taskEndDate = t.endDate ? parseISO(t.endDate) : taskDate
+      return t.status === "WAITING" && isBefore(taskEndDate, today)
     })
 
+    setOverdueAlerts(overdue)
+
     if (overdue.length > 0) {
-      setOverdueAlerts(overdue)
-      
       // Check if we already alerted today
       const todayStr = format(today, 'yyyy-MM-dd')
       const lastAlert = localStorage.getItem('lastOverdueAlertDate')
@@ -147,7 +152,7 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
       if (lastAlert !== todayStr) {
         localStorage.setItem('lastOverdueAlertDate', todayStr)
         setTimeout(() => {
-          alert(`คุณมีงานที่ค้างจากวันก่อนหน้าจำนวน ${overdue.length} งาน พื้นหลังของงานจะเปลี่ยนเป็นสีส้ม กรุณาคลิกที่งานในปฏิทินเพื่อจัดการหรืออัปเดตสถานะ`)
+          alert(`คุณมีงานที่ค้างจากวันก่อนหน้าจำนวน ${overdue.length} งาน คุณสามารถจัดการงานค้างได้โดยกดปุ่ม "งานค้าง" ที่มุมขวาบน`)
         }, 500)
       }
     }
@@ -353,8 +358,29 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
           <h1 style={{ color: "var(--color-primary)", margin: 0, fontSize: "1.75rem", fontWeight: 700 }}>ปฏิทินแผนงาน</h1>
           <p style={{ margin: 0, marginTop: "0.5rem", color: "var(--color-text-muted)" }}>แผนการทำงานและติดตามสภาพอากาศ</p>
         </div>
-        <button 
-          onClick={() => setIsExportModalOpen(true)}
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {overdueAlerts.length > 0 && (
+            <button
+              onClick={() => setIsOverdueModalOpen(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.5rem 1rem",
+                backgroundColor: "#e74c3c",
+                color: "white",
+                border: "none",
+                borderRadius: "var(--radius-md)",
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "0 4px 6px rgba(231, 76, 60, 0.3)"
+              }}
+            >
+              <FiAlertCircle /> งานค้าง ({overdueAlerts.length})
+            </button>
+          )}
+          <button 
+            onClick={() => setIsExportModalOpen(true)}
           style={{
             display: "flex",
             alignItems: "center",
@@ -369,7 +395,8 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
           }}
         >
           <FiDownload /> Export PDF
-        </button>
+          </button>
+        </div>
       </div>
 
       {currentMonthIssues.length > 0 && (
@@ -436,6 +463,17 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         tasks={tasks}
+      />
+      <OverdueModal
+        isOpen={isOverdueModalOpen}
+        onClose={() => setIsOverdueModalOpen(false)}
+        overdueTasks={overdueAlerts}
+        onCompleteTask={async (task) => {
+          await handleSaveTask({ ...task, status: "ACTIVATED" })
+        }}
+        onDeleteTask={async (id) => {
+          await handleDeleteTask(id)
+        }}
       />
     </div>
   )
