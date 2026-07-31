@@ -25,12 +25,17 @@ export async function GET(req: NextRequest) {
       try {
         // We use Bangkok as default for this example. A real app might map lat/lon to province.
         const tmdUrl = `https://data.tmd.go.th/api/WeatherForecast7Days/V1/?type=json&province=กรุงเทพมหานคร`
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3500) // 3.5s timeout for Vercel
+
         const tmdRes = await fetch(tmdUrl, {
           headers: {
             'Authorization': `Bearer ${tmdKey}`,
             'Accept': 'application/json'
-          }
+          },
+          signal: controller.signal
         })
+        clearTimeout(timeoutId)
         
         if (tmdRes.ok) {
           const tmdData = await tmdRes.json()
