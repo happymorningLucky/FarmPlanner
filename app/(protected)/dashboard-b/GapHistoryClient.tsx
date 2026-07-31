@@ -12,6 +12,7 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
   const [endDate, setEndDate] = useState("")
   const [plotSearch, setPlotSearch] = useState("")
   const [keywordSearch, setKeywordSearch] = useState("")
+  const [excludedTaskIds, setExcludedTaskIds] = useState<string[]>([])
 
   const filteredTasks = completedTasks.filter(task => {
     // Date filter
@@ -60,6 +61,15 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
     setPlotSearch("")
     setKeywordSearch("")
   }
+
+  const toggleTask = (id: string) => {
+    setExcludedTaskIds(prev => 
+      prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id]
+    )
+  }
+
+  const selectAll = () => setExcludedTaskIds([])
+  const deselectAll = () => setExcludedTaskIds(filteredTasks.map(t => t.id))
 
   const hasFilters = startDate || endDate || plotSearch || keywordSearch
 
@@ -114,10 +124,18 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
       </div>
 
       <div className={styles.card}>
+        <div className="print:hidden" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", padding: "0 1rem" }}>
+          <span style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>* ติ๊กเครื่องหมายถูกออก หากไม่ต้องการให้แสดงในใบปรินต์ GAP</span>
+          <div>
+            <button onClick={selectAll} style={{ background: "none", border: "none", color: "var(--color-primary)", cursor: "pointer", fontSize: "0.85rem", marginRight: "0.5rem" }}>เลือกทั้งหมด</button>
+            <button onClick={deselectAll} style={{ background: "none", border: "none", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "0.85rem" }}>ไม่เลือกทั้งหมด</button>
+          </div>
+        </div>
         <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
+              <th className="print:hidden" style={{ width: "40px", textAlign: "center" }}>ปรินต์</th>
               <th>วันที่ดำเนินการ</th>
               <th>ชื่องาน / กิจกรรม</th>
               <th>แปลง</th>
@@ -129,38 +147,49 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
           <tbody>
             {filteredTasks.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.emptyState}>
+                <td colSpan={7} className={styles.emptyState}>
                   {hasFilters ? "ไม่พบข้อมูลที่ตรงกับตัวกรอง" : "ยังไม่มีประวัติการทำงาน"}
                 </td>
               </tr>
             ) : (
-              filteredTasks.map((task: any) => (
-                <tr key={task.id}>
-                  <td>{format(new Date(task.date), "dd MMM yyyy", { locale: th })}</td>
-                  <td>
-                    <span className={styles.icon}>{task.icon}</span> 
-                    {task.title}
-                  </td>
-                  <td>{task.plot || "-"}</td>
-                  <td>
-                    {task.usages && task.usages.length > 0 ? (
-                      <ul style={{ margin: 0, paddingLeft: "1.2rem", listStyleType: "circle", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        {task.usages.map((u: any, idx: number) => (
-                          <li key={idx}>
-                            {u.inventory?.name} : <strong>{u.quantity} {u.inventory?.usageUnit || 'หน่วย'}</strong>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : "-"}
-                  </td>
-                  <td>{task.updater?.username || "-"}</td>
-                  <td>
-                    <span className={styles.statusActivated}>
-                      <FiCheckCircle /> เสร็จสิ้น
-                    </span>
-                  </td>
-                </tr>
-              ))
+              filteredTasks.map((task: any) => {
+                const isExcluded = excludedTaskIds.includes(task.id);
+                return (
+                  <tr key={task.id} className={isExcluded ? "print:hidden" : ""} style={{ opacity: isExcluded ? 0.4 : 1, transition: "opacity 0.2s" }}>
+                    <td className="print:hidden" style={{ textAlign: "center" }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!isExcluded} 
+                        onChange={() => toggleTask(task.id)}
+                        style={{ cursor: "pointer", width: "1.2rem", height: "1.2rem" }}
+                      />
+                    </td>
+                    <td>{format(new Date(task.date), "dd MMM yyyy", { locale: th })}</td>
+                    <td>
+                      <span className={styles.icon}>{task.icon}</span> 
+                      {task.title}
+                    </td>
+                    <td>{task.plot || "-"}</td>
+                    <td>
+                      {task.usages && task.usages.length > 0 ? (
+                        <ul style={{ margin: 0, paddingLeft: "1.2rem", listStyleType: "circle", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                          {task.usages.map((u: any, idx: number) => (
+                            <li key={idx}>
+                              {u.inventory?.name} : <strong>{u.quantity} {u.inventory?.usageUnit || 'หน่วย'}</strong>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : "-"}
+                    </td>
+                    <td>{task.updater?.username || "-"}</td>
+                    <td>
+                      <span className={styles.statusActivated}>
+                        <FiCheckCircle /> เสร็จสิ้น
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -169,3 +198,4 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
     </div>
   )
 }
+
