@@ -21,6 +21,7 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
   const [startMonth, setStartMonth] = useState(format(new Date(), "yyyy-MM"))
   const [endMonth, setEndMonth] = useState(format(new Date(), "yyyy-MM"))
   const [loading, setLoading] = useState(false)
+  const [excludedTaskIds, setExcludedTaskIds] = useState<string[]>([])
   const exportRef = useRef<HTMLDivElement>(null)
 
   if (!isOpen) return null
@@ -33,6 +34,17 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
     const taskDate = parseISO(t.date)
     return isWithinInterval(taskDate, { start, end })
   }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  const toggleTask = (id: string) => {
+    setExcludedTaskIds(prev => 
+      prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id]
+    )
+  }
+
+  const selectAll = () => setExcludedTaskIds([])
+  const deselectAll = () => setExcludedTaskIds(filteredTasks.map(t => t.id))
+
+  const tasksToExport = filteredTasks.filter(t => !excludedTaskIds.includes(t.id))
 
   const handleExport = async () => {
     if (!exportRef.current) return
@@ -74,20 +86,65 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
         </div>
         
         <div className={styles.body}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>ตั้งแต่เดือน</label>
-            <input type="month" className={styles.input} value={startMonth} onChange={e => setStartMonth(e.target.value)} />
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <div className={styles.formGroup} style={{ flex: 1 }}>
+              <label className={styles.label}>ตั้งแต่เดือน</label>
+              <input type="month" className={styles.input} value={startMonth} onChange={e => setStartMonth(e.target.value)} />
+            </div>
+            <div className={styles.formGroup} style={{ flex: 1 }}>
+              <label className={styles.label}>ถึงเดือน</label>
+              <input type="month" className={styles.input} value={endMonth} onChange={e => setEndMonth(e.target.value)} />
+            </div>
           </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>ถึงเดือน</label>
-            <input type="month" className={styles.input} value={endMonth} onChange={e => setEndMonth(e.target.value)} />
+          
+          <div style={{ marginTop: "1rem", borderTop: "1px solid var(--color-border)", paddingTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+              <h3 style={{ fontSize: "1rem", margin: 0 }}>เลือกงานที่ต้องการ Export</h3>
+              <div>
+                <button onClick={selectAll} style={{ background: "none", border: "none", color: "var(--color-primary)", cursor: "pointer", fontSize: "0.85rem", marginRight: "0.5rem" }}>เลือกทั้งหมด</button>
+                <button onClick={deselectAll} style={{ background: "none", border: "none", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "0.85rem" }}>ไม่เลือกทั้งหมด</button>
+              </div>
+            </div>
+            <div style={{ maxHeight: "250px", overflowY: "auto", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", backgroundColor: "#fafafa" }}>
+              {filteredTasks.length === 0 ? (
+                <div style={{ padding: "2rem", textAlign: "center", color: "var(--color-text-muted)" }}>ไม่มีงานในช่วงเดือนนี้</div>
+              ) : (
+                filteredTasks.map(task => (
+                  <label key={task.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", borderBottom: "1px solid var(--color-border)", cursor: "pointer", backgroundColor: excludedTaskIds.includes(task.id) ? "#f9f9f9" : "white" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={!excludedTaskIds.includes(task.id)} 
+                      onChange={() => toggleTask(task.id)} 
+                      style={{ width: "1.25rem", height: "1.25rem", cursor: "pointer" }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: excludedTaskIds.includes(task.id) ? "var(--color-text-muted)" : "var(--color-text-main)" }}>
+                        {task.icon} {task.title} {task.plot ? `(${task.plot})` : ""}
+                      </div>
+                      <div style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
+                        {format(parseISO(task.date), "dd MMM yyyy", { locale: th })} {task.endDate ? `- ${format(parseISO(task.endDate), "dd MMM yyyy", { locale: th })}` : ""}
+                      </div>
+                    </div>
+                    <span style={{ 
+                      padding: "2px 6px", 
+                      borderRadius: "4px", 
+                      fontSize: "11px", 
+                      backgroundColor: task.status === "ACTIVATED" ? "#e8f5e9" : "#fff3e0",
+                      color: task.status === "ACTIVATED" ? "#2e7d32" : "#e65100"
+                    }}>
+                      {task.status === "ACTIVATED" ? "เสร็จสิ้น" : "รอทำ"}
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
           </div>
         </div>
         
         <div className={styles.footer}>
           <button onClick={onClose} className={styles.cancelBtn} disabled={loading}>ยกเลิก</button>
-          <button onClick={handleExport} className={styles.exportBtn} disabled={loading}>
-            <FiDownload /> {loading ? "กำลังสร้าง PDF..." : "Export PDF"}
+          <button onClick={handleExport} className={styles.exportBtn} disabled={loading || tasksToExport.length === 0}>
+            <FiDownload /> {loading ? "กำลังสร้าง PDF..." : `Export PDF (${tasksToExport.length} งาน)`}
           </button>
         </div>
       </div>
@@ -96,14 +153,14 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
       <div ref={exportRef} style={{ display: "none", position: "absolute", left: "-9999px", top: 0, width: "800px", padding: "40px", backgroundColor: "white", color: "black", fontFamily: "'Prompt', sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px", borderBottom: "2px solid #8e44ad", paddingBottom: "20px" }}>
           <div>
-            <h1 style={{ color: "#8e44ad", margin: 0 }}>Farm Planner</h1>
+            <h1 style={{ color: "#8e44ad", margin: 0 }}>Farm Planner (บันทึก GAP)</h1>
             <p style={{ margin: "5px 0 0 0", fontSize: "16px", color: "#666" }}>
               แผนงานตั้งแต่: {format(start, "MMMM yyyy", { locale: th })} ถึง {format(end, "MMMM yyyy", { locale: th })}
             </p>
           </div>
           <div style={{ textAlign: "center" }}>
             <QRCodeCanvas value={`${appUrl}/planner`} size={100} />
-            <p style={{ fontSize: "12px", marginTop: "5px" }}>สแกนเพื่อดูในมือถือ</p>
+            <p style={{ fontSize: "12px", marginTop: "5px" }}>สแกนเพื่อเข้าสู่ระบบ</p>
           </div>
         </div>
 
@@ -116,16 +173,21 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
             </tr>
           </thead>
           <tbody>
-            {filteredTasks.length === 0 ? (
+            {tasksToExport.length === 0 ? (
               <tr>
-                <td colSpan={3} style={{ padding: "20px", textAlign: "center", color: "#666" }}>ไม่มีงานในช่วงเดือนนี้</td>
+                <td colSpan={3} style={{ padding: "20px", textAlign: "center", color: "#666" }}>ไม่มีงานที่เลือก</td>
               </tr>
             ) : (
-              filteredTasks.map(task => (
+              tasksToExport.map(task => (
                 <tr key={task.id}>
-                  <td style={{ padding: "10px", borderBottom: "1px solid #eee" }}>{format(parseISO(task.date), "dd MMM yyyy", { locale: th })}</td>
-                  <td style={{ padding: "10px", borderBottom: "1px solid #eee" }}>{task.icon} {task.title} {task.plot ? `(${task.plot})` : ""}</td>
-                  <td style={{ padding: "10px", borderBottom: "1px solid #eee" }}>
+                  <td style={{ padding: "10px", borderBottom: "1px solid #eee", verticalAlign: "top" }}>
+                    {format(parseISO(task.date), "dd MMM yy", { locale: th })}
+                    {task.endDate && (
+                      <div><small style={{ color: "#666" }}>ถึง {format(parseISO(task.endDate), "dd MMM yy", { locale: th })}</small></div>
+                    )}
+                  </td>
+                  <td style={{ padding: "10px", borderBottom: "1px solid #eee", verticalAlign: "top" }}>{task.icon} {task.title} {task.plot ? `(${task.plot})` : ""}</td>
+                  <td style={{ padding: "10px", borderBottom: "1px solid #eee", verticalAlign: "top" }}>
                     <span style={{ 
                       padding: "4px 8px", 
                       borderRadius: "4px", 
@@ -145,3 +207,4 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
     </div>
   )
 }
+
