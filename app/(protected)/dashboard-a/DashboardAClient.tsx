@@ -99,10 +99,10 @@ export default function DashboardAClient({ inventories: initialInventories, mock
   const vpd = svp * (1 - (iot.airHumidity / 100))
 
   useEffect(() => {
-    // Fetch 7-day weather
+    // Fetch 7-day weather from proxy
     const fetchWeather = async () => {
       try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=temperature_2m_max,relative_humidity_2m_mean,precipitation_probability_max&timezone=auto&forecast_days=7`)
+        const res = await fetch(`/api/weather?lat=${coords.lat}&lon=${coords.lon}`)
         const data = await res.json()
         
         if (data.error) {
@@ -114,9 +114,15 @@ export default function DashboardAClient({ inventories: initialInventories, mock
           date: t,
           temp: data.daily.temperature_2m_max[i],
           humidity: data.daily.relative_humidity_2m_mean[i],
-          rainProb: data.daily.precipitation_probability_max[i]
+          rainProb: data.daily.precipitation_probability_max[i],
+          source: data.daily.source[i]
         }))
-        setWeather(formatted)
+
+        // Filter only next 7 days from today
+        const todayStr = format(new Date(), 'yyyy-MM-dd')
+        const filtered = formatted.filter((w: any) => w.date >= todayStr).slice(0, 7)
+        
+        setWeather(filtered)
       } catch (err) {
         console.error("Failed to fetch weather", err)
       }
@@ -357,7 +363,13 @@ export default function DashboardAClient({ inventories: initialInventories, mock
             {weather ? weather.map((w: any) => (
               <div key={w.date} className={styles.weatherItem}>
                 <div className={styles.weatherDate}>
-                  {format(parseISO(w.date), "dd MMM yy", { locale: th })}
+                  <p style={{ margin: 0 }}>{format(parseISO(w.date), "EEE", { locale: th })}</p>
+                  <small>{format(parseISO(w.date), "d MMM", { locale: th })}</small>
+                  {w.source === 'TMD' ? (
+                    <span style={{ display: 'block', fontSize: '0.6rem', padding: '2px 4px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', marginTop: '2px', textAlign: 'center' }}>🇹🇭 TMD</span>
+                  ) : (
+                    <span style={{ display: 'block', fontSize: '0.6rem', padding: '2px 4px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '4px', marginTop: '2px', textAlign: 'center' }}>🌐 Global</span>
+                  )}
                 </div>
                 <div className={styles.weatherDetails}>
                   <span>{w.temp}°C</span>

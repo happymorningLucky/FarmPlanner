@@ -38,6 +38,7 @@ type WeatherData = {
   temperature_2m_max: number[]
   relative_humidity_2m_mean: number[]
   precipitation_probability_max: number[]
+  source: string[]
 }
 
 import TaskModal from "./TaskModal"
@@ -119,7 +120,7 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=temperature_2m_max,relative_humidity_2m_mean,precipitation_probability_max&timezone=auto&forecast_days=14&past_days=31`)
+        const res = await fetch(`/api/weather?lat=${coords.lat}&lon=${coords.lon}`)
         const data = await res.json()
         if (data.error) {
           alert("พิกัดไม่ถูกต้อง หรือไม่สามารถดึงข้อมูลสภาพอากาศได้")
@@ -297,7 +298,14 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
               <span className={`${styles.dateNum} ${isToday ? styles.dateNumToday : ""}`}>{formattedDate}</span>
               {weatherIdx !== -1 && (
                 <div className={styles.weatherInfo}>
-                  <span>{weatherData!.temperature_2m_max[weatherIdx]}°C</span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <span>{weatherData!.temperature_2m_max[weatherIdx]}°C</span>
+                    {weatherData!.source && weatherData!.source[weatherIdx] === 'TMD' ? (
+                      <span style={{ fontSize: '0.5rem', padding: '1px 3px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '3px' }}>🇹🇭</span>
+                    ) : (
+                      <span style={{ fontSize: '0.5rem', padding: '1px 3px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '3px' }}>🌐</span>
+                    )}
+                  </div>
                   <span>💧 {weatherData!.relative_humidity_2m_mean[weatherIdx]}%</span>
                   {weatherData!.precipitation_probability_max[weatherIdx] > 50 && (
                     <span className={styles.weatherDanger}>⛈️ {weatherData!.precipitation_probability_max[weatherIdx]}%</span>
