@@ -40,7 +40,14 @@ export default async function DashboardBPage() {
 
       <NotificationClient tasks={waitingTasks.map(t => ({...t, date: t.date.toISOString(), createdAt: t.createdAt.toISOString(), updatedAt: t.updatedAt.toISOString()}))} />
 
-      <GapHistoryClient completedTasks={completedTasks} />
+      <GapHistoryClient completedTasks={completedTasks.map(t => ({
+        ...t, 
+        date: t.date.toISOString(), 
+        createdAt: t.createdAt.toISOString(), 
+        updatedAt: t.updatedAt.toISOString(),
+        endDate: t.endDate ? t.endDate.toISOString() : null
+      }))} />
     </div>
   )
 }
+

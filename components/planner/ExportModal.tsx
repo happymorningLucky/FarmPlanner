@@ -31,7 +31,7 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
   const end = endOfMonth(new Date(endMonth))
   
   const filteredTasks = tasks.filter(t => {
-    const taskDate = parseISO(t.date)
+    const taskDate = typeof t.date === 'string' ? parseISO(t.date) : new Date(t.date);
     return isWithinInterval(taskDate, { start, end })
   }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
@@ -122,7 +122,7 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
                         {task.icon} {task.title} {task.plot ? `(${task.plot})` : ""}
                       </div>
                       <div style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
-                        {format(parseISO(task.date), "dd MMM yyyy", { locale: th })} {task.endDate ? `- ${format(parseISO(task.endDate), "dd MMM yyyy", { locale: th })}` : ""}
+                        {format(typeof task.date === 'string' ? parseISO(task.date) : new Date(task.date), "dd MMM yyyy", { locale: th })} {task.endDate ? `- ${format(typeof task.endDate === 'string' ? parseISO(task.endDate) : new Date(task.endDate), "dd MMM yyyy", { locale: th })}` : ""}
                       </div>
                     </div>
                     <span style={{ 
@@ -181,9 +181,9 @@ export default function ExportModal({ isOpen, onClose, tasks }: ExportModalProps
               tasksToExport.map(task => (
                 <tr key={task.id}>
                   <td style={{ padding: "10px", borderBottom: "1px solid #eee", verticalAlign: "top" }}>
-                    {format(parseISO(task.date), "dd MMM yy", { locale: th })}
+                    {format(typeof task.date === 'string' ? parseISO(task.date) : new Date(task.date), "dd MMM yy", { locale: th })}
                     {task.endDate && (
-                      <div><small style={{ color: "#666" }}>ถึง {format(parseISO(task.endDate), "dd MMM yy", { locale: th })}</small></div>
+                      <div><small style={{ color: "#666" }}>ถึง {format(typeof task.endDate === 'string' ? parseISO(task.endDate) : new Date(task.endDate), "dd MMM yy", { locale: th })}</small></div>
                     )}
                   </td>
                   <td style={{ padding: "10px", borderBottom: "1px solid #eee", verticalAlign: "top" }}>{task.icon} {task.title} {task.plot ? `(${task.plot})` : ""}</td>
