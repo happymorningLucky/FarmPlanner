@@ -258,11 +258,6 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
                 <input className={styles.input} value={plot} onChange={e => setPlot(e.target.value)} placeholder="เช่น แปลง A" />
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>แปลง (Plot)</label>
-                <input className={styles.input} value={plot} onChange={e => setPlot(e.target.value)} placeholder="เช่น แปลง A" />
-              </div>
-
               {type !== "MEMO" && (
                 <div className={styles.formGroup}>
                   <label className={styles.label}>สถานะ</label>
@@ -281,17 +276,6 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
               )}
 
 
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>ไอคอน (สัญลักษณ์)</label>
-                <div className={styles.iconGrid}>
-                  {ICONS.map(i => (
-                    <button type="button" key={i} className={`${styles.iconBtn} ${icon === i ? styles.iconBtnActive : ""}`} onClick={() => setIcon(i)}>
-                      {i}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>ไอคอน (สัญลักษณ์)</label>
