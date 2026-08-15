@@ -10,7 +10,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
   const body = await req.json()
-  const { title, date, endDate, icon, color, plot, status, usages, waterVolume } = body
+  const { title, date, endDate, icon, color, plot, status, usages, waterVolume, type } = body
 
   try {
     const existingTask = await prisma.task.findUnique({ 
@@ -68,16 +68,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     }
 
+    const taskType = type || existingTask.type || "TASK"
+
     const task = await prisma.task.update({
       where: { id },
       data: {
+        type: taskType,
         title,
         date: finalDate,
         endDate: endDate ? new Date(endDate) : null,
         icon,
-        color,
+        color: taskType === "MEMO" ? "#5D4037" : color,
         plot,
-        status: status || existingTask.status,
+        status: taskType === "MEMO" ? "MEMO" : (status || existingTask.status),
         waterVolume: waterVolume !== undefined ? (waterVolume ? parseFloat(waterVolume) : null) : existingTask.waterVolume,
         overdueDays: overdueDays,
         updaterId: session.user.id,

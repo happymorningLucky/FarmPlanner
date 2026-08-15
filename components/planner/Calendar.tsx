@@ -22,6 +22,7 @@ import styles from "./Calendar.module.css"
 
 type Task = {
   id: string
+  type?: string
   title: string
   date: string
   endDate?: string | null
@@ -317,14 +318,16 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
             <div className={styles.taskList}>
               {dayTasks.map(t => {
                 const taskDate = parseISO(t.date)
-                const isOverdue = t.status === "WAITING" && isBefore(taskDate, startOfToday())
-                const bgColor = isOverdue ? "#f97316" : t.color
+                const isOverdue = t.type !== "MEMO" && t.status === "WAITING" && isBefore(taskDate, startOfToday())
+                const bgColor = t.type === "MEMO" ? "transparent" : (isOverdue ? "#f97316" : t.color)
+                const textColor = t.type === "MEMO" ? "#5D4037" : "inherit"
+                const fontWeight = t.type === "MEMO" ? "bold" : "normal"
                 
                 return (
                   <div 
                     key={t.id} 
                     className={`${styles.taskItem} ${t.status === "ACTIVATED" ? styles.taskCompleted : ""}`}
-                    style={{ backgroundColor: bgColor }}
+                    style={{ backgroundColor: bgColor, color: textColor, fontWeight: fontWeight }}
                     onClick={(e) => openEditTaskModal(t, e)}
                   >
                     <span className={styles.taskIcon}>{t.icon}</span>

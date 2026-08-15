@@ -24,6 +24,7 @@ model User {
 
 model Task {
   id           String   @id @default(cuid())
+  type         String   @default("TASK") // "TASK" or "MEMO"
   title        String
   date         DateTime
   endDate      DateTime? // Optional end date for multi-day tasks

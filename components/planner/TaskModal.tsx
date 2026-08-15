@@ -28,6 +28,7 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
   const [icon, setIcon] = useState("📝")
   const [color, setColor] = useState("#8e44ad")
   const [status, setStatus] = useState("WAITING")
+  const [type, setType] = useState<"TASK" | "MEMO">("TASK")
   const [multiplier, setMultiplier] = useState<string>("")
   const [usages, setUsages] = useState<{ inventoryId: string, quantity: string }[]>([])
   const [inventories, setInventories] = useState<Inventory[]>([])
@@ -42,6 +43,7 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
           setInventories(data)
           if (existingTask) {
             setMode("view")
+            setType(existingTask.type || "TASK")
             setTitle(existingTask.title)
             setStartDate(format(new Date(existingTask.date), "yyyy-MM-dd"))
             setEndDate(existingTask.endDate ? format(new Date(existingTask.endDate), "yyyy-MM-dd") : "")
@@ -64,6 +66,7 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
             }
           } else {
             setMode("edit")
+            setType("TASK")
             setTitle("")
             setStartDate(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "")
             setEndDate("")
@@ -87,15 +90,16 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
     try {
       await onSave({
         id: existingTask?.id,
+        type,
         title,
         date: startDate ? new Date(startDate).toISOString() : selectedDate?.toISOString(),
         endDate: endDate ? new Date(endDate).toISOString() : null,
         icon,
-        color,
+        color: type === "MEMO" ? "#5D4037" : color,
         plot,
-        status,
-        waterVolume: multiplier ? parseFloat(multiplier) : null,
-        usages: usages.filter(u => u.inventoryId && u.quantity).map(u => {
+        status: type === "MEMO" ? "MEMO" : status,
+        waterVolume: type === "MEMO" ? null : (multiplier ? parseFloat(multiplier) : null),
+        usages: type === "MEMO" ? [] : usages.filter(u => u.inventoryId && u.quantity).map(u => {
           const inv = inventories.find(i => i.id === u.inventoryId)
           const conv = inv?.conversionRate || 1
           return { ...u, quantity: parseFloat(u.quantity) * conv }
@@ -146,7 +150,7 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2 className={styles.title}>{existingTask ? "แก้ไขงาน" : "เพิ่มงานใหม่"}</h2>
+          <h2 className={styles.title}>{existingTask ? (existingTask.type === "MEMO" ? "แก้ไขบันทึกย่อ" : "แก้ไขงาน") : "เพิ่มงานใหม่"}</h2>
           <button onClick={onClose} className={styles.closeBtn}><FiX size={24} /></button>
         </div>
         
@@ -174,10 +178,16 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
                 </div>
               )}
               <div className={styles.formGroup}>
-                <span className={styles.label}>สถานะ:</span>
-                <div>{existingTask.status === "ACTIVATED" ? "เสร็จสิ้น (Activated)" : "รอดำเนินการ (Waiting)"}</div>
+                <span className={styles.label}>ประเภท:</span>
+                <div>{existingTask.type === "MEMO" ? "บันทึกย่อ (Memo)" : "งาน (Task)"}</div>
               </div>
-              {(existingTask.title.includes("พ่น") || existingTask.title.includes("ใส่")) && (
+              {existingTask.type !== "MEMO" && (
+                <div className={styles.formGroup}>
+                  <span className={styles.label}>สถานะ:</span>
+                  <div>{existingTask.status === "ACTIVATED" ? "เสร็จสิ้น (Activated)" : "รอดำเนินการ (Waiting)"}</div>
+                </div>
+              )}
+              {existingTask.type !== "MEMO" && (existingTask.title.includes("พ่น") || existingTask.title.includes("ใส่")) && (
                 <div className={styles.formGroup}>
                   <span className={styles.label}>{existingTask.title.includes("พ่น") ? "จำนวนถังที่ใช้:" : "จำนวนต้น:"}</span>
                   <div>{existingTask.waterVolume || "-"} {existingTask.title.includes("พ่น") ? "ถัง (200L)" : "ต้น"}</div>
@@ -210,6 +220,18 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
         ) : (
           <form onSubmit={handleSubmit}>
             <div className={styles.body}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>ประเภท</label>
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <input type="radio" name="type" value="TASK" checked={type === "TASK"} onChange={() => setType("TASK")} /> งาน (Task)
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <input type="radio" name="type" value="MEMO" checked={type === "MEMO"} onChange={() => setType("MEMO")} /> บันทึกย่อ (Memo)
+                  </label>
+                </div>
+              </div>
+
               <div className={styles.formGroup} style={{ display: "flex", gap: "1rem" }}>
                 <div style={{ flex: 1 }}>
                   <label className={styles.label}>วันที่เริ่มต้น</label>
@@ -237,14 +259,21 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>สถานะ</label>
-                <select className={styles.select} value={status} onChange={e => setStatus(e.target.value)}>
-                  <option value="WAITING">รอดำเนินการ (Waiting)</option>
-                  <option value="ACTIVATED">เสร็จสิ้น (Activated)</option>
-                </select>
+                <label className={styles.label}>แปลง (Plot)</label>
+                <input className={styles.input} value={plot} onChange={e => setPlot(e.target.value)} placeholder="เช่น แปลง A" />
               </div>
 
-              {(title.includes("พ่น") || title.includes("ใส่")) && (
+              {type !== "MEMO" && (
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>สถานะ</label>
+                  <select className={styles.select} value={status} onChange={e => setStatus(e.target.value)}>
+                    <option value="WAITING">รอดำเนินการ (Waiting)</option>
+                    <option value="ACTIVATED">เสร็จสิ้น (Activated)</option>
+                  </select>
+                </div>
+              )}
+
+              {type !== "MEMO" && (title.includes("พ่น") || title.includes("ใส่")) && (
                 <div className={styles.formGroup}>
                   <label className={styles.label}>{title.includes("พ่น") ? "จำนวนถัง (200 ลิตร/ถัง)" : "จำนวนต้น"}</label>
                   <input type="number" step="0.01" className={styles.input} value={multiplier} onChange={e => setMultiplier(e.target.value)} placeholder={title.includes("พ่น") ? "เช่น 12" : "เช่น 100"} />
@@ -265,16 +294,30 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>สีของงาน</label>
-                <div className={styles.colorGrid}>
-                  {COLORS.map(c => (
-                    <button type="button" key={c} className={`${styles.colorBtn} ${color === c ? styles.colorBtnActive : ""}`} style={{ backgroundColor: c }} onClick={() => setColor(c)} />
+                <label className={styles.label}>ไอคอน (สัญลักษณ์)</label>
+                <div className={styles.iconGrid}>
+                  {ICONS.map(i => (
+                    <button type="button" key={i} className={`${styles.iconBtn} ${icon === i ? styles.iconBtnActive : ""}`} onClick={() => setIcon(i)}>
+                      {i}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>รายการพัสดุ (ปุ๋ย/ยา) ที่จะใช้ หรือ ตัดสต๊อก</label>
+              {type !== "MEMO" && (
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>สีของงาน</label>
+                  <div className={styles.colorGrid}>
+                    {COLORS.map(c => (
+                      <button type="button" key={c} className={`${styles.colorBtn} ${color === c ? styles.colorBtnActive : ""}`} style={{ backgroundColor: c }} onClick={() => setColor(c)} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {type !== "MEMO" && (
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>รายการพัสดุ (ปุ๋ย/ยา) ที่จะใช้ หรือ ตัดสต๊อก</label>
                 {usages.map((usage, idx) => {
                   const selectedInv = inventories.find(i => i.id === usage.inventoryId)
                   let recommended = null
@@ -368,6 +411,7 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
                   + เพิ่มพัสดุ
                 </button>
               </div>
+              )}
             </div>
             
             <div className={styles.footer}>

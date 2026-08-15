@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { title, date, endDate, icon, color, plot, status, usages, waterVolume } = body
+  const { title, date, endDate, icon, color, plot, status, usages, waterVolume, type } = body
 
   // Block if ACTIVATED and stock insufficient
   if (status === "ACTIVATED" && usages && Array.isArray(usages) && usages.length > 0) {
@@ -25,13 +25,14 @@ export async function POST(req: Request) {
   try {
     const task = await prisma.task.create({
       data: {
+        type: type || "TASK",
         title,
         date: new Date(date),
         endDate: endDate ? new Date(endDate) : null,
         icon,
-        color,
+        color: type === "MEMO" ? "#5D4037" : color,
         plot,
-        status: status || "WAITING",
+        status: type === "MEMO" ? "MEMO" : (status || "WAITING"),
         waterVolume: waterVolume ? parseFloat(waterVolume) : null,
         creatorId: session.user.id,
         updaterId: session.user.id,
