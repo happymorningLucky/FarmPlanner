@@ -254,8 +254,8 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>แปลง (Plot)</label>
-                <input className={styles.input} value={plot} onChange={e => setPlot(e.target.value)} placeholder="เช่น แปลง A" />
+                <label className={styles.label}>{type === "MEMO" ? "สถานที่ (Place)" : "แปลง (Plot)"}</label>
+                <input className={styles.input} value={plot} onChange={e => setPlot(e.target.value)} placeholder={type === "MEMO" ? "เช่น ร้านค้า, สถานที่ประชุม" : "เช่น แปลง A"} />
               </div>
 
               {type !== "MEMO" && (
