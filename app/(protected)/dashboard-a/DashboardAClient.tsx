@@ -23,8 +23,10 @@ export default function DashboardAClient({ inventories: initialInventories, mock
   const [weather, setWeather] = useState<any>(null)
   const [locationInput, setLocationInput] = useState("")
   const [coords, setCoords] = useState({ lat: 13.75, lon: 100.51 })
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const saved = localStorage.getItem("farm_location")
     if (saved) {
       setLocationInput(saved)
@@ -284,6 +286,7 @@ export default function DashboardAClient({ inventories: initialInventories, mock
     setShowAddForm(false)
   }
 
+  if (!mounted) return null
   return (
     <div className={styles.container}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>

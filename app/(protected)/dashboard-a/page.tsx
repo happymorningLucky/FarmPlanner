@@ -2,9 +2,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import nextDynamic from 'next/dynamic'
-
-const DashboardAClient = nextDynamic(() => import('./DashboardAClient'), { ssr: false })
+import DashboardAClient from "./DashboardAClient"
 
 export const dynamic = "force-dynamic"
 

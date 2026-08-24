@@ -3,10 +3,8 @@ import { format } from "date-fns"
 import { th } from "date-fns/locale"
 import styles from "./dashboardB.module.css"
 import { FiCheckCircle } from "react-icons/fi"
-import nextDynamic from 'next/dynamic'
-
-const NotificationClient = nextDynamic(() => import('./NotificationClient'), { ssr: false })
-const GapHistoryClient = nextDynamic(() => import('./GapHistoryClient'), { ssr: false })
+import NotificationClient from "./NotificationClient"
+import GapHistoryClient from "./GapHistoryClient"
 
 export const dynamic = "force-dynamic"
 

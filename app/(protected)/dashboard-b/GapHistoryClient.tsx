@@ -13,6 +13,11 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
   const [plotSearch, setPlotSearch] = useState("")
   const [keywordSearch, setKeywordSearch] = useState("")
   const [isExportOpen, setIsExportOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const filteredTasks = completedTasks.filter(task => {
     // Date filter
@@ -64,6 +69,7 @@ export default function GapHistoryClient({ completedTasks }: { completedTasks: a
 
   const hasFilters = startDate || endDate || plotSearch || keywordSearch
 
+  if (!mounted) return null
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }} className="print:hidden">

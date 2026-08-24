@@ -7,6 +7,11 @@ import TaskModal from "@/components/planner/TaskModal"
 
 export default function NotificationClient({ tasks }: { tasks: any[] }) {
   const [selectedTask, setSelectedTask] = useState<any | null>(null)
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Find tasks that have unacknowledged warnings
   const warnings = tasks.filter(t => {
@@ -18,7 +23,7 @@ export default function NotificationClient({ tasks }: { tasks: any[] }) {
     })
   })
 
-  if (warnings.length === 0) return null
+  if (!mounted || warnings.length === 0) return null
 
   const handleSaveTask = async (taskData: any) => {
     const res = await fetch(`/api/tasks/${taskData.id}`, {

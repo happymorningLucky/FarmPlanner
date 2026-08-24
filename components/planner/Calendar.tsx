@@ -59,8 +59,10 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
   const [locationInput, setLocationInput] = useState("")
   const [coords, setCoords] = useState({ lat: 13.75, lon: 100.51 })
   const [expandedIssue, setExpandedIssue] = useState<number | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const saved = localStorage.getItem("farm_location")
     if (saved) {
       setLocationInput(saved)
@@ -361,6 +363,7 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
     }
   })
 
+  if (!mounted) return null
   return (
     <div className={styles.calendarContainer}>
       
