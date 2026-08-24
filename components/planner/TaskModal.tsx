@@ -34,9 +34,16 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
   const [inventories, setInventories] = useState<Inventory[]>([])
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState<"view" | "edit">("edit")
+  const [favorites, setFavorites] = useState<any[]>([])
+  const [useFavorite, setUseFavorite] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
+      // Fetch favorites
+      fetch("/api/favorites").then(res => res.json()).then(data => {
+        if (Array.isArray(data)) setFavorites(data)
+      }).catch(e => console.log(e))
+
       // Fetch inventories
       fetch("/api/inventory").then(res => res.json()).then(data => {
         if (Array.isArray(data)) {
@@ -220,6 +227,48 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
         ) : (
           <form onSubmit={handleSubmit}>
             <div className={styles.body}>
+              {!existingTask && (
+                <div className={styles.formGroup} style={{ background: "#f8f9fa", padding: "10px", borderRadius: "8px", border: "1px dashed #ccc" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: "bold", color: "var(--color-primary)" }}>
+                    <input type="checkbox" checked={useFavorite} onChange={e => setUseFavorite(e.target.checked)} /> ⭐ เลือกใช้งานโปรด
+                  </label>
+                  {useFavorite && favorites.length > 0 && (
+                    <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <select className={styles.select} onChange={(e) => {
+                        const fav = favorites.find(f => f.id === e.target.value)
+                        if (fav) {
+                          setType(fav.type)
+                          setTitle(fav.title)
+                          setPlot(fav.plot || "")
+                          setIcon(fav.icon)
+                          setColor(fav.color)
+                        }
+                      }} id="fav-select">
+                        <option value="">-- เลือกงานโปรด --</option>
+                        {favorites.map(f => (
+                          <option key={f.id} value={f.id}>{f.title} ({f.plot || "ไม่มีแปลง"})</option>
+                        ))}
+                      </select>
+                      <button type="button" onClick={async () => {
+                        const select = document.getElementById("fav-select") as HTMLSelectElement
+                        if (select && select.value) {
+                           if(confirm("ต้องการลบงานโปรดนี้หรือไม่?")) {
+                             await fetch(`/api/favorites/${select.value}`, { method: 'DELETE' })
+                             setFavorites(favorites.filter(f => f.id !== select.value))
+                             select.value = ""
+                           }
+                        }
+                      }} style={{ background: "none", border: "none", color: "red", cursor: "pointer", fontSize: "1.2rem" }} title="ลบงานโปรด">
+                        <FiX />
+                      </button>
+                    </div>
+                  )}
+                  {useFavorite && favorites.length === 0 && (
+                    <div style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#888" }}>ยังไม่มีงานโปรดที่บันทึกไว้</div>
+                  )}
+                </div>
+              )}
+              
               <div className={styles.formGroup}>
                 <label className={styles.label}>ประเภท</label>
                 <div style={{ display: "flex", gap: "1rem" }}>
@@ -404,6 +453,27 @@ export default function TaskModal({ isOpen, onClose, onSave, onDelete, selectedD
               )}
               {existingTask && (
                 <button type="button" onClick={handleDelete} className={styles.deleteBtn} disabled={loading}>ลบงาน</button>
+              )}
+              {!existingTask && (
+                <button type="button" onClick={async () => {
+                  if (!title) return alert("กรุณากรอกชื่องานก่อนบันทึกเป็นงานโปรด")
+                  setLoading(true)
+                  try {
+                    const res = await fetch("/api/favorites", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ title, type, plot, icon, color })
+                    })
+                    const newFav = await res.json()
+                    if (newFav.error) throw new Error(newFav.error)
+                    setFavorites([newFav, ...favorites])
+                    alert("บันทึกเป็นงานโปรดเรียบร้อยแล้ว")
+                  } catch (e) {
+                    console.error(e)
+                    alert("เกิดข้อผิดพลาดในการบันทึกงานโปรด")
+                  }
+                  setLoading(false)
+                }} className={styles.cancelBtn} style={{ background: "#f1c40f", color: "white", borderColor: "#f1c40f", marginRight: "auto" }} disabled={loading}>⭐ บันทึกโปรด</button>
               )}
               <button type="button" onClick={onClose} className={styles.cancelBtn} disabled={loading}>ยกเลิก</button>
               <button type="submit" className={styles.saveBtn} disabled={loading}>บันทึก</button>
