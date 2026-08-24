@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma"
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { getIssues } from "@/lib/actions/issueActions"
 
-const Calendar = dynamic(() => import('@/components/planner/Calendar'), { ssr: false })
+const Calendar = nextDynamic(() => import('@/components/planner/Calendar'), { ssr: false })
 
 export const dynamic = "force-dynamic"
 
