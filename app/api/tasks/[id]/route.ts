@@ -60,7 +60,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     let overdueDays: number | null = (existingTask as any).overdueDays || null
 
     if (status === "ACTIVATED" && existingTask.status === "WAITING") {
-      const today = startOfToday()
+      // Calculate today in Thailand Time (UTC+7)
+      const now = new Date()
+      const thTime = new Date(now.getTime() + (7 * 60 * 60 * 1000))
+      const today = new Date(Date.UTC(thTime.getUTCFullYear(), thTime.getUTCMonth(), thTime.getUTCDate()))
+      
       const originalDate = new Date(existingTask.date)
       if (originalDate < today) {
         overdueDays = differenceInDays(today, originalDate)
