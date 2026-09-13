@@ -428,7 +428,7 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
                   <div className={styles.amuletTitle} title={issue.problem} style={{ margin: isExpanded ? "0 0 0.5rem 0" : "0", flex: 1, wordBreak: "break-word", overflowWrap: "break-word" }}>
-                    ⚠️ {isExpanded ? 'เฝ้าระวัง: ' : ''}{issue.problem}
+                    {issue.type === "MEMO" ? "📝 " : "⚠️ "}{isExpanded ? (issue.type === "MEMO" ? 'บันทึกย่อ: ' : 'เฝ้าระวัง: ') : ''}{issue.problem}
                   </div>
                   {isExpanded && (
                     <button 
@@ -443,9 +443,11 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
                 
                 {isExpanded && (
                   <>
-                    <p className={styles.amuletAction} title={issue.action}>
-                      🎯 วิธีปฏิบัติ: <span className={styles.amuletActionHighlight}>{issue.action}</span>
-                    </p>
+                    {issue.type !== "MEMO" && (
+                      <p className={styles.amuletAction} title={issue.action}>
+                        🎯 วิธีปฏิบัติ: <span className={styles.amuletActionHighlight}>{issue.action}</span>
+                      </p>
+                    )}
                     <div className={styles.amuletAssignees}>
                       <span className={styles.amuletAssigneeLabel}>ผู้รับผิดชอบ</span>
                       <span className={styles.amuletAssigneeNames} title={assigneeNames.length > 30 ? "ทุกคน" : assigneeNames}>

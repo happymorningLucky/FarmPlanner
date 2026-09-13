@@ -44,19 +44,24 @@ export async function getResolvedIssues() {
 }
 
 export async function createIssue(data: {
+  type?: string;
   startMonth: number;
   endMonth: number;
   problem: string;
-  action: string;
+  action?: string;
   assigneeIds: string[];
 }) {
   try {
+    const issueType = data.type || "ISSUE";
+    const issueAction = issueType === "MEMO" ? "-" : (data.action || "-");
+    
     const issue = await prisma.issue.create({
       data: {
+        type: issueType,
         startMonth: data.startMonth,
         endMonth: data.endMonth,
         problem: data.problem,
-        action: data.action,
+        action: issueAction,
         assignees: {
           connect: data.assigneeIds.map(id => ({ id }))
         }
@@ -97,20 +102,25 @@ export async function resolveIssue(issueId: string, resolution: string, resolver
 }
 
 export async function updateIssue(id: string, data: {
+  type?: string;
   startMonth: number;
   endMonth: number;
   problem: string;
-  action: string;
+  action?: string;
   assigneeIds: string[];
 }) {
   try {
+    const issueType = data.type || "ISSUE";
+    const issueAction = issueType === "MEMO" ? "-" : (data.action || "-");
+
     const issue = await prisma.issue.update({
       where: { id },
       data: {
+        type: issueType,
         startMonth: data.startMonth,
         endMonth: data.endMonth,
         problem: data.problem,
-        action: data.action,
+        action: issueAction,
         assignees: {
           set: [], 
           connect: data.assigneeIds.map(id => ({ id }))

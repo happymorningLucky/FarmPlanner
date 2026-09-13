@@ -21,6 +21,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
   const [endMonth, setEndMonth] = useState(1)
   const [problem, setProblem] = useState("")
   const [action, setAction] = useState("")
+  const [type, setType] = useState("ISSUE")
   const [assigneeIds, setAssigneeIds] = useState<string[]>([])
   const [editIssueId, setEditIssueId] = useState<string | null>(null)
 
@@ -28,8 +29,13 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
   const [filterMonth, setFilterMonth] = useState<number | "ALL">("ALL")
   const [filterKeyword, setFilterKeyword] = useState("")
   const [filterAssignee, setFilterAssignee] = useState<string | "ALL">("ALL")
+  const [filterType, setFilterType] = useState<string | "ALL">("ALL")
 
   const filteredIssues = activeIssues.filter((issue: any) => {
+    if (filterType !== "ALL") {
+      const iType = issue.type || "ISSUE";
+      if (iType !== filterType) return false;
+    }
     if (filterMonth !== "ALL") {
       const sm = issue.startMonth;
       const em = issue.endMonth;
@@ -78,7 +84,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!problem || !action || assigneeIds.length === 0) {
+    if (!problem || (type === "ISSUE" && !action) || assigneeIds.length === 0) {
       alert("กรุณากรอกข้อมูลให้ครบและเลือกผู้รับผิดชอบอย่างน้อย 1 คน")
       return
     }
@@ -88,6 +94,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
     try {
       if (editIssueId) {
         res = await updateIssue(editIssueId, {
+          type,
           startMonth,
           endMonth,
           problem,
@@ -96,6 +103,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
         })
       } else {
         res = await createIssue({
+          type,
           startMonth,
           endMonth,
           problem,
@@ -108,6 +116,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
       if (res.success) {
         setProblem("")
         setAction("")
+        setType("ISSUE")
         setAssigneeIds([])
         setStartMonth(1)
         setEndMonth(1)
@@ -127,6 +136,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
     setEndMonth(issue.endMonth)
     setProblem(issue.problem)
     setAction(issue.action)
+    setType(issue.type || "ISSUE")
     setAssigneeIds(issue.assignees.map((a: any) => a.id))
     setEditIssueId(issue.id)
     setIsAdding(true)
@@ -240,6 +250,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
               setEditIssueId(null)
               setProblem("")
               setAction("")
+              setType("ISSUE")
               setAssigneeIds([])
             } else {
               setIsAdding(true)
@@ -262,8 +273,19 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
 
       {isAdding && (
         <form onSubmit={handleSubmit} style={{ backgroundColor: "var(--color-surface)", padding: "1.5rem", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)", border: "1px solid var(--color-border)", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)", paddingBottom: "0.5rem", marginBottom: "1rem" }}>{editIssueId ? "ฟอร์มแก้ไขปัญหาที่ต้องเฝ้าระวัง" : "ฟอร์มเพิ่มปัญหาที่ต้องเฝ้าระวัง"}</h2>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)", paddingBottom: "0.5rem", marginBottom: "1rem" }}>{editIssueId ? "ฟอร์มแก้ไข" : "ฟอร์มเพิ่มข้อมูล"}</h2>
           
+          <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1.5rem" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+              <input type="radio" name="issueType" checked={type === "ISSUE"} onChange={() => setType("ISSUE")} style={{ accentColor: "var(--color-primary)", width: "1.2rem", height: "1.2rem" }} />
+              <span style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-text-main)" }}>📌 ปัญหา (Issue)</span>
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+              <input type="radio" name="issueType" checked={type === "MEMO"} onChange={() => setType("MEMO")} style={{ accentColor: "var(--color-primary)", width: "1.2rem", height: "1.2rem" }} />
+              <span style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-text-main)" }}>📝 บันทึกย่อ (Memo)</span>
+            </label>
+          </div>
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", marginBottom: "0.25rem" }}>ตั้งแต่เดือน</label>
@@ -288,18 +310,19 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
           </div>
 
           <div style={{ marginBottom: "1rem" }}>
-            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", marginBottom: "0.25rem" }}>ปัญหาที่ต้องระวัง</label>
+            <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", marginBottom: "0.25rem" }}>{type === "MEMO" ? "รายละเอียดบันทึกย่อ" : "ปัญหาที่ต้องระวัง"}</label>
             <input 
               required
               type="text" 
-              placeholder="เช่น โรครากเน่าโคนเน่า, แมลงหวี่ขาวระบาด"
+              placeholder={type === "MEMO" ? "เช่น ประชุมประจำเดือน, ติดต่อร้านปุ๋ย" : "เช่น โรครากเน่าโคนเน่า, แมลงหวี่ขาวระบาด"}
               value={problem} 
               onChange={e => setProblem(e.target.value)}
               style={{ width: "100%", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.75rem", backgroundColor: "var(--color-background)" }}
             />
           </div>
 
-          <div style={{ marginBottom: "1rem" }}>
+          {type === "ISSUE" && (
+            <div style={{ marginBottom: "1rem" }}>
             <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)", marginBottom: "0.25rem" }}>สิ่งที่ต้องปฏิบัติ (วิธีป้องกัน/รับมือ)</label>
             <input 
               required
@@ -310,6 +333,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
               style={{ width: "100%", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.75rem", backgroundColor: "var(--color-background)" }}
             />
           </div>
+          )}
 
           <div style={{ marginBottom: "1rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
@@ -361,6 +385,14 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
       {/* Filter UI */}
       <div style={{ backgroundColor: "var(--color-surface)", padding: "1rem 1.5rem", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)", border: "1px solid var(--color-border)", marginBottom: "1rem", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)" }}>ประเภท:</label>
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)" }}>
+            <option value="ALL">ทั้งหมด</option>
+            <option value="ISSUE">📌 ปัญหา</option>
+            <option value="MEMO">📝 บันทึกย่อ</option>
+          </select>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--color-text-main)" }}>กรองตามเดือน:</label>
           <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value === "ALL" ? "ALL" : Number(e.target.value))} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "0.5rem", backgroundColor: "var(--color-background)" }}>
             <option value="ALL">ทุกเดือน</option>
@@ -378,8 +410,8 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
             {users.map((u: any) => <option key={u.id} value={u.id}>{u.username}</option>)}
           </select>
         </div>
-        {(filterMonth !== "ALL" || filterKeyword || filterAssignee !== "ALL") && (
-          <button onClick={() => { setFilterMonth("ALL"); setFilterKeyword(""); setFilterAssignee("ALL"); }} style={{ color: "red", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", background: "none", border: "none" }}>ล้างตัวกรอง</button>
+        {(filterType !== "ALL" || filterMonth !== "ALL" || filterKeyword || filterAssignee !== "ALL") && (
+          <button onClick={() => { setFilterType("ALL"); setFilterMonth("ALL"); setFilterKeyword(""); setFilterAssignee("ALL"); }} style={{ color: "red", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", background: "none", border: "none" }}>ล้างตัวกรอง</button>
         )}
       </div>
 
@@ -389,7 +421,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
           <thead>
             <tr style={{ backgroundColor: "var(--color-background)", borderBottom: "2px solid var(--color-border)", textAlign: "left" }}>
               <th style={{ padding: "1.2rem 1rem", fontWeight: 700, color: "var(--color-text-main)", width: "15%" }}>ช่วงเดือน</th>
-              <th style={{ padding: "1.2rem 1rem", fontWeight: 700, color: "var(--color-text-main)", width: "20%" }}>ปัญหา</th>
+              <th style={{ padding: "1.2rem 1rem", fontWeight: 700, color: "var(--color-text-main)", width: "20%" }}>หัวข้อ / ปัญหา</th>
               <th style={{ padding: "1.2rem 1rem", fontWeight: 700, color: "var(--color-text-main)", width: "35%" }}>สิ่งที่ต้องปฏิบัติ</th>
               <th style={{ padding: "1.2rem 1rem", fontWeight: 700, color: "var(--color-text-main)", width: "15%" }}>ผู้รับผิดชอบ</th>
               <th style={{ padding: "1.2rem 1rem", fontWeight: 700, color: "var(--color-text-main)", textAlign: "right", width: "15%" }}>จัดการ</th>
@@ -407,9 +439,14 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
                     {MONTHS[issue.startMonth - 1]} - {MONTHS[issue.endMonth - 1]}
                   </td>
                   <td style={{ padding: "1rem" }}>
-                    <span style={{ color: "#ef4444", fontWeight: 700 }}>⚠️ {issue.problem}</span>
+                    <span style={{ color: (issue.type === "MEMO") ? "#8b5cf6" : "#ef4444", fontWeight: 700 }}>
+                      {(issue.type === "MEMO") ? "📝 " : "⚠️ "} 
+                      {issue.problem}
+                    </span>
                   </td>
-                  <td style={{ padding: "1rem", color: "var(--color-text-main)" }}>{issue.action}</td>
+                  <td style={{ padding: "1rem", color: "var(--color-text-main)" }}>
+                    {issue.type === "MEMO" ? "-" : issue.action}
+                  </td>
                   <td style={{ padding: "1rem" }}>{renderAssignees(issue.assignees)}</td>
                   <td style={{ padding: "1rem", textAlign: "right" }}>
                     <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
@@ -443,21 +480,23 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
                       >
                         🗑️ ลบ
                       </button>
-                      <button 
-                        onClick={() => setResolveTargetId(issue.id)}
-                        style={{
-                          backgroundColor: "#dcfce7",
-                          color: "#166534",
-                          padding: "0.5rem 0.75rem",
-                          borderRadius: "var(--radius-md)",
-                          fontSize: "0.85rem",
-                          fontWeight: 700,
-                          border: "none",
-                          cursor: "pointer"
-                        }}
-                      >
-                        ✔ ปิดปัญหา
-                      </button>
+                      {(!issue.type || issue.type === "ISSUE") && (
+                        <button 
+                          onClick={() => setResolveTargetId(issue.id)}
+                          style={{
+                            backgroundColor: "#dcfce7",
+                            color: "#166534",
+                            padding: "0.5rem 0.75rem",
+                            borderRadius: "var(--radius-md)",
+                            fontSize: "0.85rem",
+                            fontWeight: 700,
+                            border: "none",
+                            cursor: "pointer"
+                          }}
+                        >
+                          ✔ ปิดปัญหา
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
