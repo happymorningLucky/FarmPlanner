@@ -439,7 +439,7 @@ export default function IssueClient({ activeIssues, resolvedIssues, users }: any
                     {MONTHS[issue.startMonth - 1]} - {MONTHS[issue.endMonth - 1]}
                   </td>
                   <td style={{ padding: "1rem" }}>
-                    <span style={{ color: (issue.type === "MEMO") ? "#8b5cf6" : "#ef4444", fontWeight: 700 }}>
+                    <span style={{ color: (issue.type === "MEMO") ? "#1e3a8a" : "#ef4444", fontWeight: 700 }}>
                       {(issue.type === "MEMO") ? "📝 " : "⚠️ "} 
                       {issue.problem}
                     </span>
