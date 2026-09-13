@@ -422,12 +422,12 @@ export default function Calendar({ initialTasks, issues = [] }: CalendarProps) {
             return (
               <div 
                 key={idx} 
-                className={`${styles.amuletCard} ${isExpanded ? styles.amuletCardExpanded : ''}`}
+                className={`${styles.amuletCard} ${issue.type === "MEMO" ? styles.memoCard : ''} ${isExpanded ? styles.amuletCardExpanded : ''}`}
                 onClick={() => !isExpanded && setExpandedIssue(idx)}
                 style={{ cursor: isExpanded ? "default" : "pointer" }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
-                  <div className={styles.amuletTitle} title={issue.problem} style={{ margin: isExpanded ? "0 0 0.5rem 0" : "0", flex: 1, wordBreak: "break-word", overflowWrap: "break-word" }}>
+                  <div className={`${styles.amuletTitle} ${issue.type === "MEMO" ? styles.amuletTitleMemo : ''}`} title={issue.problem} style={{ margin: isExpanded ? "0 0 0.5rem 0" : "0", flex: 1, wordBreak: "break-word", overflowWrap: "break-word" }}>
                     {issue.type === "MEMO" ? "📝 " : "⚠️ "}{isExpanded ? (issue.type === "MEMO" ? 'บันทึกย่อ: ' : 'เฝ้าระวัง: ') : ''}{issue.problem}
                   </div>
                   {isExpanded && (

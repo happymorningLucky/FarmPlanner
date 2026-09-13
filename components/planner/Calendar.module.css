@@ -205,6 +205,15 @@
   border-color: #f87171;
 }
 
+.memoCard {
+  border: 1px solid #c7d2fe;
+  border-top: 4px solid #4338ca;
+}
+
+.memoCard:hover {
+  border-color: #818cf8;
+}
+
 .amuletTitle {
   color: #dc2626;
   font-weight: 700;
@@ -212,6 +221,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.amuletTitleMemo {
+  color: #4338ca;
 }
 
 .amuletAction {
